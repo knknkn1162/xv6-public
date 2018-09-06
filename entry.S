@@ -38,6 +38,7 @@ multiboot_header:
 # Since we haven't set up virtual memory yet, our entry point is
 # the physical address of 'entry'.
 .globl _start
+# the entry address is 0x10000c
 _start = V2P_WO(entry)
 
 # Entering xv6 on boot processor, with paging off.
@@ -45,13 +46,18 @@ _start = V2P_WO(entry)
 entry:
   # Turn on page size extension for 4Mbyte pages
   movl    %cr4, %eax
+# #define CR4_PSE         0x00000010      // Page size extension
   orl     $(CR4_PSE), %eax
   movl    %eax, %cr4
   # Set page directory
+  // %cr3 must be a physical address
+  // paging hardware doen't know how to translate virtual address yet
   movl    $(V2P_WO(entrypgdir)), %eax
   movl    %eax, %cr3
   # Turn on paging.
   movl    %cr0, %eax
+# #define CR0_PG          0x80000000      // Paging
+# #define CR0_WP          0x00010000      // Write Protect
   orl     $(CR0_PG|CR0_WP), %eax
   movl    %eax, %cr0
 
@@ -65,4 +71,6 @@ entry:
   mov $main, %eax
   jmp *%eax
 
+// declares a common symbol named symbol.
+// malloc KSTACKSIZE
 .comm stack, KSTACKSIZE
