@@ -2,8 +2,6 @@
 //
 // Part of the boot block, along with bootasm.S, which calls bootmain().
 // bootasm.S has put the processor into protected 32-bit mode.
-// bootmain() loads an ELF kernel image from the disk starting at
-// sector 1 and then jumps to the kernel entry routine.
 
 #include "types.h"
 #include "elf.h"
@@ -14,6 +12,8 @@
 
 void readseg(uchar*, uint, uint);
 
+// bootmain() loads an ELF kernel image from the disk starting at
+// sector 1 and then jumps to the kernel entry routine.
 void
 bootmain(void)
 {
@@ -70,10 +70,15 @@ readsect(void *dst, uint offset)
   // Issue command.
   waitdisk();
   //   asm volatile("out %0,%1" : : "a" (data), "d" (port));
+  // Number of sectors to read/write (0 is a special value).
+  // The kernel has been written to the boot disk contiguously starting at sector 1.
   outb(0x1F2, 1);   // count = 1
+  // This is CHS / LBA28 / LBA48 specific.
   outb(0x1F3, offset);
+  // 	Partial Disk Sector address.(0)
   outb(0x1F4, offset >> 8);
   outb(0x1F5, offset >> 16);
+  // Send 0xE0 for the "master"
   outb(0x1F6, (offset >> 24) | 0xE0);
   outb(0x1F7, 0x20);  // cmd 0x20 - read sectors
 
