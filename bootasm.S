@@ -86,10 +86,12 @@ start32:
   call    bootmain
 
   # If bootmain returns (it shouldn't), trigger a Bochs
+  # Bochs is a highly portable open source IA-32 (x86) PC emulator
   # breakpoint if running under Bochs, then loop.
   movw    $0x8a00, %ax            # 0x8a00 -> port 0x8a00
   movw    %ax, %dx
   outw    %ax, %dx
+  # return the Bochs to the debugger prompt. Basically the same as doing CTRL+C.
   movw    $0x8ae0, %ax            # 0x8ae0 -> port 0x8a00
   outw    %ax, %dx
 spin:
@@ -107,4 +109,3 @@ gdtdesc:
   .word   (gdtdesc - gdt - 1)             # sizeof(gdt) - 1
   # the upper 32 bits tell the location of the GDT in memory
   .long   gdt                             # address gdt
-

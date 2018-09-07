@@ -12,9 +12,19 @@ inb(ushort port)
 static inline void
 insl(int port, void *addr, int cnt)
 {
+  // cld: clear the DF flag: direct lowest-to-highest address
+  // Input doubleword from I/O port specified in DX into memory location specified with ES:(E)DI.
   asm volatile("cld; rep insl" :
+              // output operand
+              // D: edi, c: ecx(counter)
                "=D" (addr), "=c" (cnt) :
+               // input operand
+               // d: edx register,
+               // 0: compat with "=D" (addr)
+               // 1: compat with "=c" (cnt)
                "d" (port), "0" (addr), "1" (cnt) :
+               // if memory may be destructed, set "memory"
+               // if EFLAGS clear, set cc
                "memory", "cc");
 }
 
@@ -42,6 +52,7 @@ outsl(int port, const void *addr, int cnt)
 static inline void
 stosb(void *addr, int data, int cnt)
 {
+  // read byte from al register to %es:%edi
   asm volatile("cld; rep stosb" :
                "=D" (addr), "=c" (cnt) :
                "0" (addr), "1" (cnt), "a" (data) :

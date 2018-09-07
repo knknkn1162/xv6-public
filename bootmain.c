@@ -22,6 +22,7 @@ bootmain(void)
   void (*entry)(void);
   uchar* pa;
 
+  // ELF binary places in-memory copy at address 0x10000
   elf = (struct elfhdr*)0x10000;  // scratch space
 
   // Read 1st page off disk
@@ -32,12 +33,18 @@ bootmain(void)
     return;  // let bootasm.S handle error
 
   // Load each program segment (ignores ph flags).
+  // program header table offset, 0 if not present.
   ph = (struct proghdr*)((uchar*)elf + elf->phoff);
+  // number of program header entries, 0 if not present.
   eph = ph + elf->phnum;
   for(; ph < eph; ph++){
     pa = (uchar*)ph->paddr;
+    // physical memory
     readseg(pa, ph->filesz, ph->off);
+    // If the segment’s memory size (p_memsz) is larger than the file size (p_filesz), the ‘‘extra’’ bytes are defined to hold the value 0 and to follow the segment’s initialized area.
     if(ph->memsz > ph->filesz)
+      // stosb(void *addr, int data, int cnt)
+      // initialize every byte of a block of memory
       stosb(pa + ph->filesz, 0, ph->memsz - ph->filesz);
   }
 
@@ -51,6 +58,7 @@ void
 waitdisk(void)
 {
   // Wait for disk ready.
+  // send command to port 0x1F7
   while((inb(0x1F7) & 0xC0) != 0x40)
     ;
 }
@@ -61,6 +69,7 @@ readsect(void *dst, uint offset)
 {
   // Issue command.
   waitdisk();
+  //   asm volatile("out %0,%1" : : "a" (data), "d" (port));
   outb(0x1F2, 1);   // count = 1
   outb(0x1F3, offset);
   outb(0x1F4, offset >> 8);
@@ -70,6 +79,7 @@ readsect(void *dst, uint offset)
 
   // Read data.
   waitdisk();
+  // input doubleword * SECTSIZE/4 bytes from 0x1F0 into dst
   insl(0x1F0, dst, SECTSIZE/4);
 }
 
