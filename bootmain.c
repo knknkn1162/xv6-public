@@ -26,7 +26,7 @@ bootmain(void)
   elf = (struct elfhdr*)0x10000;  // scratch space
 
   // Read 1st page off disk
-  readseg((uchar*)elf, 4096, 0);
+  readseg((uchar*)elf, 4096, 0); // 4096 = 0x1000
 
   // Is this an ELF executable?
   if(elf->magic != ELF_MAGIC)
@@ -39,7 +39,8 @@ bootmain(void)
   eph = ph + elf->phnum;
   for(; ph < eph; ph++){
     pa = (uchar*)ph->paddr;
-    // physical memory
+    // read into physical memory
+    // TODO: what is ph->off?
     readseg(pa, ph->filesz, ph->off);
     // If the segment’s memory size (p_memsz) is larger than the file size (p_filesz), the ‘‘extra’’ bytes are defined to hold the value 0 and to follow the segment’s initialized area.
     if(ph->memsz > ph->filesz)
@@ -50,7 +51,7 @@ bootmain(void)
 
   // Call the entry point from the ELF header.
   // Does not return!
-  entry = (void(*)(void))(elf->entry);
+  entry = (void(*)(void))(elf->entry); // address is 0x10000c
   entry();
 }
 
