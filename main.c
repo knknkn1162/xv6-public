@@ -22,10 +22,15 @@ main(void)
   kinit1(end, P2V(4*1024*1024)); // phys page allocator
   kvmalloc();      // kernel page table
   mpinit();        // detect other processors
+  /* ignores interrupts from the PIC, and configures the IOAPIC and local APIC */
+  // initialize local APIC
   lapicinit();     // interrupt controller
+  // initiazlie global descriptor table(GDT)
+  // struct segdesc gdt[NSEGS];   // x86 global descriptor table
   seginit();       // segment descriptors
   picinit();       // disable pic
   ioapicinit();    // another interrupt controller
+
   consoleinit();   // console hardware
   uartinit();      // serial port
   pinit();         // process table
@@ -57,8 +62,10 @@ static void
 mpmain(void)
 {
   cprintf("cpu%d: starting %d\n", cpuid(), cpuid());
+  // vector 32(=IRQ 0) is an interrupt gate
   idtinit();       // load idt register
   xchg(&(mycpu()->started), 1); // tell startothers() we're up
+  // scheduler enables interrupts
   scheduler();     // start running processes
 }
 

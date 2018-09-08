@@ -290,6 +290,7 @@ consoleinit(void)
 {
   initlock(&cons.lock, "console");
 
+  // #define CONSOLE 1
   devsw[CONSOLE].write = consolewrite;
   devsw[CONSOLE].read = consoleread;
   cons.locking = 1;

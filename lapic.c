@@ -64,8 +64,13 @@ lapicinit(void)
   // from lapic[TICR] and then issues an interrupt.
   // If xv6 cared more about precise timekeeping,
   // TICR would be calibrated using an external time source.
+  // #define TDCR    (0x03E0/4)   // Timer Divide Configuration
   lapicw(TDCR, X1);
+  // periodically generate an interrrupt at IRQ_TIMER, which is IRQ 0.
+  // #define IRQ_TIMER        0
+  // #define T_IRQ0          32      // IRQ 0 corresponds to int T_IRQ
   lapicw(TIMER, PERIODIC | (T_IRQ0 + IRQ_TIMER));
+  // #define TICR    (0x0380/4)   // Timer Initial Count
   lapicw(TICR, 10000000);
 
   // Disable logical interrupt lines.
@@ -94,6 +99,7 @@ lapicinit(void)
     ;
 
   // Enable interrupts on the APIC (but not on the processor).
+  // #define TPR     (0x0080/4)   // Task Priority
   lapicw(TPR, 0);
 }
 

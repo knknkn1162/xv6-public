@@ -84,6 +84,7 @@ lgdt(struct segdesc *p, int size)
 
 struct gatedesc;
 
+//  IDTR are loaded with a linear base address
 static inline void
 lidt(struct gatedesc *p, int size)
 {
