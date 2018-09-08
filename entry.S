@@ -49,7 +49,7 @@ entry:
 # #define CR4_PSE         0x00000010      // Page size extension
   orl     $(CR4_PSE), %eax
   movl    %eax, %cr4
-  # Set page directory
+  # Set page directory(tentative). Later, we are to set cr3 register by switchkvm() in vm.c
   // %cr3 must be a physical address
   // paging hardware doen't know how to translate virtual address yet
   movl    $(V2P_WO(entrypgdir)), %eax

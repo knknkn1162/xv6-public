@@ -49,6 +49,7 @@ fetchstr(uint addr, char **pp)
 int
 argint(int n, int *ip)
 {
+  // if n= 0, ip = &arg0, put arg0 in the value
   return fetchint((myproc()->tf->esp) + 4 + 4*n, ip);
 }
 

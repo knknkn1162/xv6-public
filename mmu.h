@@ -145,9 +145,12 @@ struct taskstate {
 };
 
 // Gate descriptors for interrupts and traps
+// 64 bit
 struct gatedesc {
+  // lower bits
   uint off_15_0 : 16;   // low 16 bits of offset in segment
   uint cs : 16;         // code segment selector
+  // upper bits
   uint args : 5;        // # args, 0 for interrupt/trap gates
   uint rsv1 : 3;        // reserved(should be zero I guess)
   uint type : 4;        // type(STS_{IG32,TG32})

@@ -10,6 +10,11 @@
 
 // Interrupt descriptor table (shared by all CPUs).
 struct gatedesc idt[256];
+
+/* #   vector0: */
+/* #     pushl $0 */
+/* #     pushl $0 */
+/* #     jmp alltraps */
 extern uint vectors[];  // in vectors.S: array of 256 entry pointers
 struct spinlock tickslock;
 uint ticks;
@@ -20,7 +25,11 @@ tvinit(void)
   int i;
 
   for(i = 0; i < 256; i++)
+    // #define SETGATE(gate, istrap, sel, off, d)
+    // #define SEG_KCODE 1  // kernel code
     SETGATE(idt[i], 0, SEG_KCODE<<3, vectors[i], 0);
+  // interrupt gate
+  // Trap gates don't clear the EFLAG, allowing other interrupts during the system call handler
   SETGATE(idt[T_SYSCALL], 1, SEG_KCODE<<3, vectors[T_SYSCALL], DPL_USER);
 
   initlock(&tickslock, "time");

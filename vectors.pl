@@ -14,6 +14,8 @@ for(my $i = 0; $i < 256; $i++){
     if(!($i == 8 || ($i >= 10 && $i <= 14) || $i == 17)){
         print "  pushl \$0\n";
     }
+
+    # each entry point is different because the x86 doesn't provide the trap number to the interrupt handler
     print "  pushl \$$i\n";
     print "  jmp alltraps\n";
 }

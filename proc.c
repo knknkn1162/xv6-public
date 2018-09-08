@@ -170,6 +170,8 @@ growproc(int n)
       return -1;
   }
   curproc->sz = sz;
+  // The x86 hardware caches page table entries in at TLB(Transition Lookaside Buffer), and when xv6 changes the page entries, it must invalidate the cached entrires
+  // swtich TSS(Task state segment) and %cr3
   switchuvm(curproc);
   return 0;
 }

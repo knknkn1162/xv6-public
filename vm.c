@@ -38,6 +38,7 @@ walkpgdir(pde_t *pgdir, const void *va, int alloc)
   pde_t *pde;
   pte_t *pgtab;
 
+  // // page directory index
   pde = &pgdir[PDX(va)];
   if(*pde & PTE_P){
     pgtab = (pte_t*)P2V(PTE_ADDR(*pde));
@@ -57,6 +58,7 @@ walkpgdir(pde_t *pgdir, const void *va, int alloc)
 // Create PTEs for virtual addresses starting at va that refer to
 // physical addresses starting at pa. va and size might not
 // be page-aligned.
+// installs mappings into a page table for a range of virtual addresses to a corresponding range of physical address.
 static int
 mappages(pde_t *pgdir, void *va, uint size, uint pa, int perm)
 {
@@ -66,6 +68,7 @@ mappages(pde_t *pgdir, void *va, uint size, uint pa, int perm)
   a = (char*)PGROUNDDOWN((uint)va);
   last = (char*)PGROUNDDOWN(((uint)va) + size - 1);
   for(;;){
+    // return page table entry. PTEs are created already.
     if((pte = walkpgdir(pgdir, a, 1)) == 0)
       return -1;
     if(*pte & PTE_P)
@@ -121,12 +124,15 @@ setupkvm(void)
   pde_t *pgdir;
   struct kmap *k;
 
+  // // Allocate one 4096-byte page of physical memory.
+  // At that time,
   if((pgdir = (pde_t*)kalloc()) == 0)
     return 0;
   memset(pgdir, 0, PGSIZE);
   if (P2V(PHYSTOP) > (void*)DEVSPACE)
     panic("PHYSTOP too high");
   for(k = kmap; k < &kmap[NELEM(kmap)]; k++)
+    // mappages(pde_t *pgdir, void *va, uint size, uint pa, int perm)
     if(mappages(pgdir, k->virt, k->phys_end - k->phys_start,
                 (uint)k->phys_start, k->perm) < 0) {
       freevm(pgdir);
@@ -140,6 +146,7 @@ setupkvm(void)
 void
 kvmalloc(void)
 {
+  // set Page Directory Entries in the global variable
   kpgdir = setupkvm();
   switchkvm();
 }
@@ -149,10 +156,11 @@ kvmalloc(void)
 void
 switchkvm(void)
 {
+  // set CR3 register
   lcr3(V2P(kpgdir));   // switch to the kernel page table
 }
 
-// Switch TSS and h/w page table to correspond to process p.
+// Switch TSS(Task state segment) and h/w page table to correspond to process p.
 void
 switchuvm(struct proc *p)
 {
@@ -164,15 +172,21 @@ switchuvm(struct proc *p)
     panic("switchuvm: no pgdir");
 
   pushcli();
+  // #define SEG_TSS   5  // this process's task state
+  // #define SEG16(type, base, lim, dpl) (struct segdesc)
   mycpu()->gdt[SEG_TSS] = SEG16(STS_T32A, &mycpu()->ts,
                                 sizeof(mycpu()->ts)-1, 0);
+  //   uint s : 1;          // 0 = system, 1 = application
   mycpu()->gdt[SEG_TSS].s = 0;
+  // 0x10000
   mycpu()->ts.ss0 = SEG_KDATA << 3;
   mycpu()->ts.esp0 = (uint)p->kstack + KSTACKSIZE;
   // setting IOPL=0 in eflags *and* iomb beyond the tss segment limit
   // forbids I/O instructions (e.g., inb and outb) from user space
   mycpu()->ts.iomb = (ushort) 0xFFFF;
+  //0x101 << 3
   ltr(SEG_TSS << 3);
+  //   asm volatile("movl %0,%%cr3" : : "r" (val));
   lcr3(V2P(p->pgdir));  // switch to process's address space
   popcli();
 }

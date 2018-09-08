@@ -21,6 +21,8 @@ exec(char *path, char **argv)
 
   begin_op();
 
+
+  // struct inode* namei(char *path)
   if((ip = namei(path)) == 0){
     end_op();
     cprintf("exec: fail\n");
@@ -47,6 +49,7 @@ exec(char *path, char **argv)
       continue;
     if(ph.memsz < ph.filesz)
       goto bad;
+    // whether  the sum overflows a 32bit interger
     if(ph.vaddr + ph.memsz < ph.vaddr)
       goto bad;
     if((sz = allocuvm(pgdir, sz, ph.vaddr + ph.memsz)) == 0)
@@ -65,6 +68,8 @@ exec(char *path, char **argv)
   sz = PGROUNDUP(sz);
   if((sz = allocuvm(pgdir, sz, sz + 2*PGSIZE)) == 0)
     goto bad;
+
+  // Clear PTE_U on a page. Used to create an inaccessible
   clearpteu(pgdir, (char*)(sz - 2*PGSIZE));
   sp = sz;
 
@@ -73,6 +78,7 @@ exec(char *path, char **argv)
     if(argc >= MAXARG)
       goto bad;
     sp = (sp - (strlen(argv[argc]) + 1)) & ~3;
+    // Copy len bytes from p to user address va in page table pgdir.
     if(copyout(pgdir, sp, argv[argc], strlen(argv[argc]) + 1) < 0)
       goto bad;
     ustack[3+argc] = sp;
