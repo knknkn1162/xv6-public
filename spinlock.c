@@ -24,7 +24,10 @@ initlock(struct spinlock *lk, char *name)
 void
 acquire(struct spinlock *lk)
 {
-  pushcli(); // disable interrupts to avoid deadlock.
+
+  // try to lock idelock, but couldn't forever..
+  // disable interrupts to avoid deadlock.
+  pushcli();
   if(holding(lk))
     panic("acquire");
 

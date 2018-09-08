@@ -64,6 +64,7 @@ sys_sleep(void)
 
   if(argint(0, &n) < 0)
     return -1;
+  // avoid race condition on `case IRQ_TIMER` on trap function
   acquire(&tickslock);
   ticks0 = ticks;
   while(ticks - ticks0 < n){
