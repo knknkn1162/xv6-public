@@ -29,6 +29,8 @@ start:
   // 12. push %ds, %es, %fs, %gs
   // 13. push general purpose registers by `pushal`
   // 14. call trap()
+  // 14-1. call syscall()
+  // 14.2. Now that `num = curproc->tf->eax` is equal to `$SYS_exec`, and the function associated with $SYS_exec number, sys_exec(void) is called.
   // 15. pop general purpose registers
   // 16. pop %ds, %es, %fs, %gs
   // 17. pop errcode and trapno
