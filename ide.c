@@ -15,8 +15,8 @@
 
 #define SECTOR_SIZE   512
 #define IDE_BSY       0x80
-#define IDE_DRDY      0x40
-#define IDE_DF        0x20
+#define IDE_DRDY      0x40 // Bit is clear when drive is spun down, or after an error. Set otherwise.
+#define IDE_DF        0x20 // Drive Fault Error (does not set ERR).
 #define IDE_ERR       0x01
 
 #define IDE_CMD_READ  0x20
@@ -103,6 +103,7 @@ idestart(struct buf *b)
   } else {
     // The interrupt will signal that the data is ready and the handler will read it.
     outb(0x1f7, read_cmd);
+    // actual read from the disk in the `insl(0x1f0, b->data, BSIZE/4);` in the ideintr() function.
   }
 }
 
@@ -122,6 +123,7 @@ ideintr(void)
   idequeue = b->qnext;
 
   // Read data if needed.
+  // idewait(1): if general error?
   if(!(b->flags & B_DIRTY) && idewait(1) >= 0)
     insl(0x1f0, b->data, BSIZE/4);
 
