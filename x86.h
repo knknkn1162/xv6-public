@@ -135,7 +135,11 @@ xchg(volatile uint *addr, uint newval)
   uint result;
 
   // The + in "+m" denotes a read-modify-write operand.
+  // LOCK is not an instruction itself: it is an instruction prefix, which applies to the following instruction.
+  // if *addr is 0 -> exchange 0 & 1 immediately -> result = 0
+  // if *addr is 1 -> exchange 1 & 1 in vain -> result = 1
   asm volatile("lock; xchgl %0, %1" :
+                // output result as eax
                "+m" (*addr), "=a" (result) :
                "1" (newval) :
                "cc");

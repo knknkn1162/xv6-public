@@ -29,6 +29,8 @@ acquire(struct spinlock *lk)
     panic("acquire");
 
   // The xchg is atomic.
+  // exchange register
+  //   asm volatile("lock; xchgl %0, %1" :
   while(xchg(&lk->locked, 1) != 0)
     ;
 
@@ -68,17 +70,23 @@ release(struct spinlock *lk)
 }
 
 // Record the current call stack in pcs[] by following the %ebp chain.
+// something like..
+// ebp - eip - locked - name
+//           ^ebp
+// why??
 void
 getcallerpcs(void *v, uint pcs[])
 {
   uint *ebp;
   int i;
 
+  // TODO: What does it mean??
   ebp = (uint*)v - 2;
   for(i = 0; i < 10; i++){
     if(ebp == 0 || ebp < (uint*)KERNBASE || ebp == (uint*)0xffffffff)
       break;
     pcs[i] = ebp[1];     // saved %eip
+    // TODO: why need?
     ebp = (uint*)ebp[0]; // saved %ebp
   }
   for(; i < 10; i++)
