@@ -27,7 +27,7 @@
 // idequeue points to the buf now being read/written to the disk.
 // idequeue->qnext points to the next buf to be processed.
 // You must hold idelock while manipulating queue.
-
+// Serialize access to disk hardware and disk queue.
 static struct spinlock idelock;
 static struct buf *idequeue;
 
@@ -161,6 +161,8 @@ iderw(struct buf *b)
   // Append b to idequeue.
   b->qnext = 0;
   // static struct buf *idequeue;
+  // processors may add new requests to the list concurrently.., so lock
+  // static struct buf *idequeue; is a global address
   for(pp=&idequeue; *pp; pp=&(*pp)->qnext)  //DOC:insert-queue
     ;
   *pp = b;
