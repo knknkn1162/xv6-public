@@ -39,7 +39,8 @@ static int
 idewait(int checkerr)
 {
   int r;
-
+  // polls the status bits until the busy bit is clear and the ready byit is set
+  // read Status Register(0xif0+7)
   while(((r = inb(0x1f7)) & (IDE_BSY|IDE_DRDY)) != IDE_DRDY)
     ;
   if(checkerr && (r & (IDE_DF|IDE_ERR)) != 0)
@@ -53,11 +54,15 @@ ideinit(void)
   int i;
 
   initlock(&idelock, "ide");
+  // register the interrupt only on the last CPU
   ioapicenable(IRQ_IDE, ncpu - 1);
   idewait(0);
 
   // Check if disk 1 is present
+  // 0b11100000 // LBA addressing
+  // 1<<4: select drive number
   outb(0x1f6, 0xe0 | (1<<4));
+  // wait for the status bit to show that the disk is ready
   for(i=0; i<1000; i++){
     if(inb(0x1f7) != 0){
       havedisk1 = 1;
@@ -93,8 +98,10 @@ idestart(struct buf *b)
   outb(0x1f6, 0xe0 | ((b->dev&1)<<4) | ((sector>>24)&0x0f));
   if(b->flags & B_DIRTY){
     outb(0x1f7, write_cmd);
+    // eventually the disk hardware will raise an interrupt to signal that the data has been written to disk
     outsl(0x1f0, b->data, BSIZE/4);
   } else {
+    // The interrupt will signal that the data is ready and the handler will read it.
     outb(0x1f7, read_cmd);
   }
 }
@@ -134,6 +141,7 @@ ideintr(void)
 // Sync buf with disk.
 // If B_DIRTY is set, write buf to disk, clear B_DIRTY, set B_VALID.
 // Else if B_VALID is not set, read buf from disk, set B_VALID.
+// Let another process run on the CPU and arrange to receive an interrupt when the disk operation has completed
 void
 iderw(struct buf *b)
 {
@@ -150,6 +158,7 @@ iderw(struct buf *b)
 
   // Append b to idequeue.
   b->qnext = 0;
+  // static struct buf *idequeue;
   for(pp=&idequeue; *pp; pp=&(*pp)->qnext)  //DOC:insert-queue
     ;
   *pp = b;
@@ -158,7 +167,8 @@ iderw(struct buf *b)
   if(idequeue == b)
     idestart(b);
 
-  // Wait for request to finish.
+  // Wait for request to finish for other process
+  // This process is sleeping, xv6 will schedule other processes to keep the CPU busy
   while((b->flags & (B_VALID|B_DIRTY)) != B_VALID){
     sleep(b, &idelock);
   }

@@ -39,6 +39,8 @@ main(void)
   tvinit();        // trap vectors
   binit();         // buffer cache
   fileinit();      // file table
+  // initialize the Disk Driver(IDE: Integrated Device Electronics)
+  // Check if disk 1 is present
   ideinit();       // disk 
   startothers();   // start other processors
   // enable locking and arrange for more memory to be allocate

@@ -25,6 +25,7 @@
 volatile struct ioapic *ioapic;
 
 // IO APIC MMIO structure: write reg, then read or write data.
+// based on REG_TABLE (0x10)
 struct ioapic {
   uint reg;
   uint pad[3];
@@ -70,6 +71,7 @@ ioapicenable(int irq, int cpunum)
   // Mark interrupt edge-triggered, active high,
   // enabled, and routed to the given cpunum,
   // which happens to be that cpu's APIC ID.
+  // #define REG_TABLE  0x10  // Redirection table base
   ioapicwrite(REG_TABLE+2*irq, T_IRQ0 + irq);
   ioapicwrite(REG_TABLE+2*irq+1, cpunum << 24);
 }

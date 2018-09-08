@@ -7,6 +7,7 @@ struct buf {
   struct buf *prev; // LRU cache list
   struct buf *next;
   struct buf *qnext; // disk queue
+  // #define BSIZE 512  // block size
   uchar data[BSIZE];
 };
 #define B_VALID 0x2  // buffer has been read from disk
