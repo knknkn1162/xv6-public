@@ -12,6 +12,27 @@ start:
   pushl $init
   pushl $0  // where caller pc would be
   movl $SYS_exec, %eax
+  // [hardware]
+  // 1. fetch the n'th descriptor from the IDT, where n is the arguement of `int`
+  // 2. check that CPL in %cs is DPL
+  // 3. save %esp and %ss in CPU-internal registers only if PL < CPL
+  // 4. load %ss and %sep from a task segment desc
+  // 5. push %ps, %esp, %eflags, %cs, %eip
+  // 6. clear the IF bit in %eflags
+  // 7. set %cs and %eip to the values in the decsciptor. %eip register tells the computer where to go next to execute the next command and controls the flow of a program.
+
+  // [software]
+  // 8. call vector60
+  // 9. pushl $0, which is errcode
+  // 10. push $60, which is trapno
+  // 11. jmp alltraps
+  // 12. push %ds, %es, %fs, %gs
+  // 13. push general purpose registers by `pushal`
+  // 14. call trap()
+  // 15. pop general purpose registers
+  // 16. pop %ds, %es, %fs, %gs
+  // 17. pop errcode and trapno
+  // 18. call iret, which jumps back into user space -> [hardware]
   int $T_SYSCALL
 
 # for(;;) exit();

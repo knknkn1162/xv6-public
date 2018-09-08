@@ -30,6 +30,7 @@ tvinit(void)
     SETGATE(idt[i], 0, SEG_KCODE<<3, vectors[i], 0);
   // interrupt gate
   // Trap gates don't clear the EFLAG, allowing other interrupts during the system call handler
+  // DPL_USER allows a user program to generate the trap with an explicit `int` instruction
   SETGATE(idt[T_SYSCALL], 1, SEG_KCODE<<3, vectors[T_SYSCALL], DPL_USER);
 
   initlock(&tickslock, "time");
