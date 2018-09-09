@@ -7,18 +7,18 @@
 # Switch stacks to new and pop previously-saved registers.
 
 
-; struct context {
-  ; uint edi;
-  ; uint esi;
-  ; uint ebx;
-  ; uint ebp;
-  ; uint eip;
-; };
+# struct context {
+ # uint edi;
+  # uint esi;
+  # uint ebx;
+  # uint ebp;
+  # uint eip;
+# };
 .globl swtch
 swtch:
-  // former context
+  # former context
   movl 4(%esp), %eax
-  // latter context
+  # latter context
   movl 8(%esp), %edx
 
   # Save old callee-saved registers
