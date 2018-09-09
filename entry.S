@@ -24,14 +24,20 @@
 #include "param.h"
 
 # Multiboot header.  Data to direct multiboot loader.
+# The Multiboot header must be contained completely within the first 8192 bytes of the OS image, and must be longword (32-bit) aligned. In general, it should come as early as possible, and may be embedded in the beginning of the text segment after the real executable header.
 .p2align 2
 .text
 .globl multiboot_header
 multiboot_header:
   #define magic 0x1badb002
   #define flags 0
+
+  # The field ‘magic’ is the magic number identifying the header, which must be the hexadecimal value 0x1BADB002. 
   .long magic
+
+  # Naturally, all as-yet-undefined bits in the ‘flags’ word must be set to zero in OS images.
   .long flags
+# when added to the other magic fields (i.e. ‘magic’ and ‘flags’), must have a 32-bit unsigned sum of zero.
   .long (-magic-flags)
 
 # By convention, the _start symbol specifies the ELF entry point.
@@ -62,6 +68,7 @@ entry:
   movl    %eax, %cr0
 
   # Set up the stack pointer.
+  # mov    $0x801020c0,%esp
   movl $(stack + KSTACKSIZE), %esp
 
   # Jump to main(), and switch to executing at

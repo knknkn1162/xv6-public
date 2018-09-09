@@ -11,6 +11,7 @@ SECTIONS
         /* Must be equal to KERNLINK */
 	. = 0x80100000;
 
+  /* specify LoadMemory Address */
 	.text : AT(0x100000) {
 		*(.text .stub .text.* .gnu.linkonce.t.*)
 	}

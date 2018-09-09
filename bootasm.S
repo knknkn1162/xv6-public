@@ -63,17 +63,16 @@ seta20.2:
   # translation, so that the mapping is still the identity mapping.
 
   #define SEG_KCODE 1  // kernel code
-  # use 0x1000 for cs register and start32 for the $eip register
   # cannot modify %cs directly, so instead the code executes an ljmp instruction
-  # The reason for load 0x1000:* is that xv6 kernel into memory at physical address 0x100000
+# set %cs <- $(SEG_CODE<<3) = 0x08, which is at the 2nd GDT entry
   ljmp    $(SEG_KCODE<<3), $start32
 
-# now the %cs is 0x1000.
 .code32  # Tell assembler to generate 32-bit code now.
 start32:
   # Set up the protected-mode data segment registers
   #define SEG_KDATA 2  // kernel data+stack
   movw    $(SEG_KDATA<<3), %ax    # Our data segment selector
+  # %ds <- 0x10, which is the 3rd index GDT entry
   movw    %ax, %ds                # -> DS: Data Segment
   movw    %ax, %es                # -> ES: Extra Segment
   movw    %ax, %ss                # -> SS: Stack Segment
