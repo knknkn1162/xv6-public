@@ -24,6 +24,7 @@ acquiresleep(struct sleeplock *lk)
 {
   acquire(&lk->lk);
   while (lk->locked) {
+    // sleep(void *chan, struct spinlock *lk)
     sleep(lk, &lk->lk);
   }
   lk->locked = 1;

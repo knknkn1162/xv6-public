@@ -40,6 +40,7 @@ acquire(struct spinlock *lk)
   // Tell the C compiler and the processor to not move loads or stores
   // past this point, to ensure that the critical section's memory
   // references happen after the lock is acquired.
+  // memory barrier
   __sync_synchronize();
 
   // Record info about lock acquisition for debugging.

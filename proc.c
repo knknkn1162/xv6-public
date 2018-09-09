@@ -319,8 +319,10 @@ wait(void)
 // Scheduler never returns.  It loops, doing:
 //  - choose a process to run
 //  - swtch to start running that process
+//
 //  - eventually that process transfers control
 //      via swtch back to the scheduler.
+// invoke in the initialization stage
 void
 scheduler(void)
 {
@@ -345,8 +347,9 @@ scheduler(void)
       switchuvm(p);
       p->state = RUNNING;
 
+      // switch current context to next context
       swtch(&(c->scheduler), p->context);
-      switchkvm();
+      switchkvm(); // switch page table
 
       // Process is done running for now.
       // It should have changed its p->state before coming back.
@@ -378,7 +381,10 @@ sched(void)
     panic("sched running");
   if(readeflags()&FL_IF)
     panic("sched interruptible");
+  // Were interrupts enabled before pushcli?
   intena = mycpu()->intena;
+  // save the current context in proc->context and switch to the sched context previously in cpu->scheduler
+  // both args are the type of `(struct context**, struct context*)`, which saves registers for kernel context switches.
   swtch(&p->context, mycpu()->scheduler);
   mycpu()->intena = intena;
 }
@@ -387,6 +393,7 @@ sched(void)
 void
 yield(void)
 {
+  // pagetable
   acquire(&ptable.lock);  //DOC: yieldlock
   myproc()->state = RUNNABLE;
   sched();
