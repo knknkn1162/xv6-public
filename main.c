@@ -9,16 +9,25 @@
 static void startothers(void);
 static void mpmain(void)  __attribute__((noreturn));
 extern pde_t *kpgdir;
+
+/* 0x801020c0                entrypgdir */
+/* [!provide]                PROVIDE (end = .) */
 extern char end[]; // first address after kernel loaded from ELF file
 
 // Bootstrap processor starts running C code here.
 // Allocate a real stack and switch to it, first
 // doing some setup required for memory allocator to work.
+//
+// At this section, The address means the virtual memory address
 int
 main(void)
 {
   // 4MB free
-  // for much of main, one cannot use locks or memory about 4MB
+  // for much of main, one cannot use locks or memory about 4MB=(0x100000)
+  // using entrypgdir to place just the pages
+  // free address at end=ceil(x801020c0)(=0x80103000) ~ 0x80503000
+  // At this stage, pgdir is defined at 0x80000000~0x80400000,
+  // so the actual range is 0x00103000~0x00400000.
   kinit1(end, P2V(4*1024*1024)); // phys page allocator
   kvmalloc();      // kernel page table
   mpinit();        // detect other processors

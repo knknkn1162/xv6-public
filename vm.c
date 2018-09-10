@@ -32,6 +32,10 @@ seginit(void)
 // Return the address of the PTE in page table pgdir
 // that corresponds to virtual address va.  If alloc!=0,
 // create any required page table pages.
+// 1. access the index of the page directory entries(PDEs), which is defined in (((uint)(va) >> 22) & 0b11 1111 1111)
+// 2. Check whether the PDE is used or not. If it is used, PTE_P is on. If not, newly allocate the space and set the flags
+// 3. return the address of the PTE above.
+//
 static pte_t *
 walkpgdir(pde_t *pgdir, const void *va, int alloc)
 {
@@ -50,6 +54,7 @@ walkpgdir(pde_t *pgdir, const void *va, int alloc)
     // The permissions here are overly generous, but they can
     // be further restricted by the permissions in the page table
     // entries, if necessary.
+    // #define PTE_U           0x004   // User
     *pde = V2P(pgtab) | PTE_P | PTE_W | PTE_U;
   }
   return &pgtab[PTX(va)];
@@ -110,10 +115,17 @@ static struct kmap {
   uint phys_start;
   uint phys_end;
   int perm;
+  /*
+    0x80101000                . = ALIGN (0x1000)
+    [!provide]                PROVIDE (data = .)
+   */
 } kmap[] = {
+ // #define EXTMEM=0x00100000
  { (void*)KERNBASE, 0,             EXTMEM,    PTE_W}, // I/O space
+ // #define KERNLINK (KERNBASE+EXTMEM)=0x80100000  // Address where kernel is linked
  { (void*)KERNLINK, V2P(KERNLINK), V2P(data), 0},     // kern text+rodata
  { (void*)data,     V2P(data),     PHYSTOP,   PTE_W}, // kern data+memory
+ // #define DEVSPACE 0xFE000000         // Other devices are at high addresses
  { (void*)DEVSPACE, DEVSPACE,      0,         PTE_W}, // more devices
 };
 
@@ -129,6 +141,8 @@ setupkvm(void)
   if((pgdir = (pde_t*)kalloc()) == 0)
     return 0;
   memset(pgdir, 0, PGSIZE);
+  // #define DEVSPACE 0xFE000000         // Other devices are at high addresses
+  // #define PHYSTOP 0xE000000           // Top physical memory
   if (P2V(PHYSTOP) > (void*)DEVSPACE)
     panic("PHYSTOP too high");
   for(k = kmap; k < &kmap[NELEM(kmap)]; k++)
@@ -148,6 +162,7 @@ kvmalloc(void)
 {
   // set Page Directory Entries in the global variable
   kpgdir = setupkvm();
+  // setup CR3 register
   switchkvm();
 }
 

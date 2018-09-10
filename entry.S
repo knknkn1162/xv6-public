@@ -75,6 +75,7 @@ entry:
   # high addresses. The indirect call is needed because
   # the assembler produces a PC-relative instruction
   # for a direct jump.
+  # mov    $0x80100034,%eax
   mov $main, %eax
   jmp *%eax
 
