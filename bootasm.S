@@ -10,6 +10,7 @@
 .code16                       # Assemble for 16-bit mode
 .globl start
 # 0x7c00 ~ 0x7e00
+# see also https://wiki.osdev.org/Memory_Map_(x86)#Overview
 start:
   # when xv6 is ready, it will re-enable interrupts
   cli                         # BIOS enabled interrupts; disable

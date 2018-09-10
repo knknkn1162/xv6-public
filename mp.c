@@ -53,6 +53,9 @@ mpsearch(void)
   struct mp *mp;
 
   bda = (uchar *) P2V(0x400);
+  // 1) in the first KB of the EBDA;
+  // BIOS Data Area (BDA) starting at 0x0400
+  // 0x40E .. EBDA base address >> 4 (usually!)
   if((p = ((bda[0x0F]<<8)| bda[0x0E]) << 4)){
     if((mp = mpsearch1(p, 1024)))
       return mp;
@@ -78,6 +81,7 @@ mpconfig(struct mp **pmp)
   if((mp = mpsearch()) == 0 || mp->physaddr == 0)
     return 0;
   conf = (struct mpconf*) P2V((uint) mp->physaddr);
+  // multiple check
   if(memcmp(conf, "PCMP", 4) != 0)
     return 0;
   if(conf->version != 1 && conf->version != 4)
@@ -101,12 +105,27 @@ mpinit(void)
   if((conf = mpconfig(&mp)) == 0)
     panic("Expect to run on an SMP");
   ismp = 1;
+  // [global] The base address by which each processor accesses its local APIC.
   lapic = (uint*)conf->lapicaddr;
   for(p=(uchar*)(conf+1), e=(uchar*)conf+conf->length; p<e; ){
     switch(*p){
     case MPPROC:
       proc = (struct mpproc*)p;
       if(ncpu < NCPU) {
+        // [global]
+        /*
+          struct cpu {
+          uchar apicid;                // Local APIC ID
+          struct context *scheduler;   // swtch() here to enter scheduler
+          struct taskstate ts;         // Used by x86 to find stack for interrupt
+          // #define NSEGS     6
+          struct segdesc gdt[NSEGS];   // x86 global descriptor table
+          volatile uint started;       // Has the CPU started?
+          int ncli;                    // Depth of pushcli nesting.
+          int intena;                  // Were interrupts enabled before pushcli?
+          struct proc *proc;           // The process running on this cpu or null
+        };
+         */
         cpus[ncpu].apicid = proc->apicid;  // apicid may differ from ncpu
         ncpu++;
       }
@@ -114,6 +133,7 @@ mpinit(void)
       continue;
     case MPIOAPIC:
       ioapic = (struct mpioapic*)p;
+      // [global] uchar ioapicid;
       ioapicid = ioapic->apicno;
       p += sizeof(struct mpioapic);
       continue;

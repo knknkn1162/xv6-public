@@ -1,12 +1,19 @@
 // See MultiProcessor Specification Version 1.[14]
+// https://pdos.csail.mit.edu/6.828/2018/readings/ia32/MPspec.pdf
 
 struct mp {             // floating pointer
+  // The ASCII string represented by “_MP_” which serves as a search key for locating the pointer structure.
   uchar signature[4];           // "_MP_"
+  // The address of the beginning of the MP configuration table. All zeros if the MP configuration table does not exist.
   void *physaddr;               // phys addr of MP config table
+// The length of the floating pointer structure table in paragraph (16-byte) units. The structure is 16 bytes or 1 paragraph long; so this field contains 01h.
   uchar length;                 // 1
+// The version number of the MP specification supported. A value of 01h indicates Version 1.1. A value of 04h indicates Version 1.4.
   uchar specrev;                // [14]
+  //  A checksum of the complete pointer structure. All bytes specified by the length field, including CHECKSUM and reserved bytes, must add up to zero.
   uchar checksum;               // all bytes must add up to 0
   uchar type;                   // MP system config type
+  // Bits 0-7: MP System Configuration Type. When these bits are all zeros, the MP configuration table is present.
   uchar imcrp;
   uchar reserved[3];
 };
@@ -20,6 +27,7 @@ struct mpconf {         // configuration table header
   uint *oemtable;               // OEM table pointer
   ushort oemlength;             // OEM table length
   ushort entry;                 // entry count
+  // The base address by which each processor accesses its local APIC.
   uint *lapicaddr;              // address of local APIC
   ushort xlength;               // extended table length
   uchar xchecksum;              // extended table checksum
