@@ -58,6 +58,7 @@ entry:
   # Set page directory(tentative). Later, we are to set cr3 register by switchkvm() in vm.c
   // %cr3 must be a physical address
   // paging hardware doen't know how to translate virtual address yet
+  // mov    $0x1020c0,%eax
   movl    $(V2P_WO(entrypgdir)), %eax
   movl    %eax, %cr3
   # Turn on paging.
