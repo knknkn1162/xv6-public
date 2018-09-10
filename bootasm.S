@@ -51,6 +51,7 @@ seta20.2:
   # Switch from real to protected mode.  Use a bootstrap GDT that makes
   # virtual addresses map directly to physical addresses so that the
   # effective memory map doesn't change during the transition.
+  # Load the Global Descriptor Table with segment descriptors suitable for code, data, and stack.
   lgdt    gdtdesc
   movl    %cr0, %eax
   #define CR0_PE          0x00000001      // Protection Enable
@@ -99,6 +100,7 @@ spin:
 # Bootstrap GDT
 .p2align 2                                # force 4 byte alignment
 gdt:
+  # each entry is 8 byte
   SEG_NULLASM                             # null seg 0x0000 0000 00 00 00 00
   SEG_ASM(STA_X|STA_R, 0x0, 0xffffffff)   # code seg
   SEG_ASM(STA_W, 0x0, 0xffffffff)         # data seg
