@@ -11,6 +11,7 @@
 #include "x86.h"
 
 // Local APIC registers, divided by 4 for use as uint[] indices.
+// See Intel SDM vol.3 Table10.1 Local APIC Register Address Map
 #define ID      (0x0020/4)   // ID
 #define VER     (0x0030/4)   // Version
 #define TPR     (0x0080/4)   // Task Priority
@@ -31,7 +32,7 @@
 #define ICRHI   (0x0310/4)   // Interrupt Command [63:32]
 #define TIMER   (0x0320/4)   // Local Vector Table 0 (TIMER)
   #define X1         0x0000000B   // divide counts by 1
-  #define PERIODIC   0x00020000   // Periodic
+#define PERIODIC   0x00020000   // Periodic
 #define PCINT   (0x0340/4)   // Performance Counter LVT
 #define LINT0   (0x0350/4)   // Local Vector Table 1 (LINT0)
 #define LINT1   (0x0360/4)   // Local Vector Table 2 (LINT1)
@@ -58,6 +59,8 @@ lapicinit(void)
     return;
 
   // Enable local APIC; set spurious interrupt vector.
+  #define SVR     (0x00F0/4)   // Spurious Interrupt Vector
+  #define ENABLE     0x00000100   // Unit Enable
   lapicw(SVR, ENABLE | (T_IRQ0 + IRQ_SPURIOUS));
 
   // The timer repeatedly counts down at bus frequency
@@ -74,11 +77,13 @@ lapicinit(void)
   lapicw(TICR, 10000000);
 
   // Disable logical interrupt lines.
+  // #define LINT0   (0x0350/4)   // Local Vector Table 1 (LINT0)
   lapicw(LINT0, MASKED);
   lapicw(LINT1, MASKED);
 
   // Disable performance counter overflow interrupts
   // on machines that provide that interrupt entry.
+  #define VER     (0x0030/4)   // Version
   if(((lapic[VER]>>16) & 0xFF) >= 4)
     lapicw(PCINT, MASKED);
 
@@ -95,6 +100,8 @@ lapicinit(void)
   // Send an Init Level De-Assert to synchronise arbitration ID's.
   lapicw(ICRHI, 0);
   lapicw(ICRLO, BCAST | INIT | LEVEL);
+  // #define ICRLO   (0x0300/4)   // Interrupt Command
+  // #define DELIVS     0x00001000   // Delivery status
   while(lapic[ICRLO] & DELIVS)
     ;
 

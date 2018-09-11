@@ -107,6 +107,7 @@ mpinit(void)
   ismp = 1;
   // [global] The base address by which each processor accesses its local APIC.
   lapic = (uint*)conf->lapicaddr;
+  // find Processor or I/O APIC
   for(p=(uchar*)(conf+1), e=(uchar*)conf+conf->length; p<e; ){
     switch(*p){
     case MPPROC:
@@ -132,6 +133,15 @@ mpinit(void)
       p += sizeof(struct mpproc);
       continue;
     case MPIOAPIC:
+      /*
+        struct mpioapic {       // I/O APIC table entry
+          uchar type;                   // entry type (2)
+          uchar apicno;                 // I/O APIC id
+          uchar version;                // I/O APIC version
+          uchar flags;                  // I/O APIC flags
+          uint *addr;                  // I/O APIC address
+        };
+       */
       ioapic = (struct mpioapic*)p;
       // [global] uchar ioapicid;
       ioapicid = ioapic->apicno;
@@ -140,6 +150,7 @@ mpinit(void)
     case MPBUS:
     case MPIOINTR:
     case MPLINTR:
+      // ignore
       p += 8;
       continue;
     default:

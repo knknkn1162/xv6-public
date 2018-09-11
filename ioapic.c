@@ -22,6 +22,7 @@
 #define INT_ACTIVELOW  0x00002000  // Active low (vs high)
 #define INT_LOGICAL    0x00000800  // Destination is CPU id (vs APIC ID)
 
+// The number of I/O APIC assumes to be 1
 volatile struct ioapic *ioapic;
 
 // IO APIC MMIO structure: write reg, then read or write data.
@@ -51,7 +52,9 @@ ioapicinit(void)
 {
   int i, id, maxintr;
 
+  // #define IOAPIC  0xFEC00000   // Default physical address of IO APIC
   ioapic = (volatile struct ioapic*)IOAPIC;
+  // #define REG_VER    0x01  // Register index: version
   maxintr = (ioapicread(REG_VER) >> 16) & 0xFF;
   id = ioapicread(REG_ID) >> 24;
   if(id != ioapicid)

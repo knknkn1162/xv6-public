@@ -54,6 +54,7 @@ struct mpioapic {       // I/O APIC table entry
 };
 
 // Table entry types
+// See table 4.3 in https://pdos.csail.mit.edu/6.828/2018/readings/ia32/MPspec.pdf
 #define MPPROC    0x00  // One per processor
 #define MPBUS     0x01  // One per bus
 #define MPIOAPIC  0x02  // One per I/O APIC
