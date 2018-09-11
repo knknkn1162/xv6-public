@@ -8,6 +8,7 @@
 
 #define IOAPIC  0xFEC00000   // Default physical address of IO APIC
 
+// see 3.0 Table2 in https://pdos.csail.mit.edu/6.828/2016/readings/ia32/ioapic.pdf
 #define REG_ID     0x00  // Register index: ID
 #define REG_VER    0x01  // Register index: version
 #define REG_TABLE  0x10  // Redirection table base
@@ -26,6 +27,7 @@
 volatile struct ioapic *ioapic;
 
 // IO APIC MMIO structure: write reg, then read or write data.
+// The IOREGSEL and IOWIN Registers (Table 3.1) can be relocated via the APIC Base Address Relocation Register in the PIIX3 and are aligned on 128 bit boundaries. 
 // based on REG_TABLE (0x10)
 struct ioapic {
   uint reg;
@@ -56,12 +58,14 @@ ioapicinit(void)
   ioapic = (volatile struct ioapic*)IOAPIC;
   // #define REG_VER    0x01  // Register index: version
   maxintr = (ioapicread(REG_VER) >> 16) & 0xFF;
+  // #define REG_ID     0x00  // Register index: ID
   id = ioapicread(REG_ID) >> 24;
   if(id != ioapicid)
     cprintf("ioapicinit: id isn't equal to ioapicid; not a MP\n");
 
   // Mark all interrupts edge-triggered, active high, disabled,
   // and not routed to any CPUs.
+  // #define REG_TABLE  0x10  // Redirection table base
   for(i = 0; i <= maxintr; i++){
     ioapicwrite(REG_TABLE+2*i, INT_DISABLED | (T_IRQ0 + i));
     ioapicwrite(REG_TABLE+2*i+1, 0);
