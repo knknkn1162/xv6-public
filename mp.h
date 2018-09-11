@@ -1,3 +1,4 @@
+#include "types.h"
 // See MultiProcessor Specification Version 1.[14]
 // https://pdos.csail.mit.edu/6.828/2018/readings/ia32/MPspec.pdf
 
