@@ -42,6 +42,7 @@
 #define TCCR    (0x0390/4)   // Timer Current Count
 #define TDCR    (0x03E0/4)   // Timer Divide Configuration
 
+// usually 0xFEE0 0000
 volatile uint *lapic;  // Initialized in mp.c
 
 //PAGEBREAK!
@@ -128,6 +129,7 @@ lapiceoi(void)
 
 // Spin for a given number of microseconds.
 // On real hardware would want to tune this dynamically.
+// TODO: What's this??
 void
 microdelay(int us)
 {

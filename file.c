@@ -10,6 +10,15 @@
 #include "sleeplock.h"
 #include "file.h"
 
+/*
+  // table mapping major device number to
+  // device functions
+  struct devsw {
+    int (*read)(struct inode*, char*, int);
+    int (*write)(struct inode*, char*, int);
+  };
+ */
+// #define NDEV         10  // maximum major device number
 struct devsw devsw[NDEV];
 struct {
   struct spinlock lock;

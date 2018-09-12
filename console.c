@@ -171,6 +171,7 @@ consputc(int c)
       ;
   }
 
+  // #define BACKSPACE 0x100
   if(c == BACKSPACE){
     uartputc('\b'); uartputc(' '); uartputc('\b');
   } else
@@ -297,4 +298,3 @@ consoleinit(void)
 
   ioapicenable(IRQ_KBD, 0);
 }
-

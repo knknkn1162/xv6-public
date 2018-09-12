@@ -27,7 +27,7 @@
 volatile struct ioapic *ioapic;
 
 // IO APIC MMIO structure: write reg, then read or write data.
-// The IOREGSEL and IOWIN Registers (Table 3.1) can be relocated via the APIC Base Address Relocation Register in the PIIX3 and are aligned on 128 bit boundaries. 
+// The IOREGSEL and IOWIN Registers (Table 3.1) can be relocated via the APIC Base Address Relocation Register in the PIIX3 and are aligned on 128 bit boundaries.
 // based on REG_TABLE (0x10)
 struct ioapic {
   uint reg;

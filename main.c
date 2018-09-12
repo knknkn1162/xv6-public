@@ -37,11 +37,13 @@ main(void)
   // initiazlie global descriptor table(GDT)
   // struct segdesc gdt[NSEGS];   // x86 global descriptor table
   seginit();       // segment descriptors
+  // Don't use the 8259A interrupt controllers.  Xv6 assumes SMP hardware.
   picinit();       // disable pic
   ioapicinit();    // another interrupt controller
 
   consoleinit();   // console hardware
   uartinit();      // serial port
+  // lock ptable
   pinit();         // process table
 
   // setup the 256 entries in the table IDT(Interrupt descriptor table)

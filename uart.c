@@ -1,4 +1,5 @@
 // Intel 8250 serial port (UART).
+// This defines a serial port (UART type 16550A). see dot-bachsrc.
 
 #include "types.h"
 #include "defs.h"
@@ -55,6 +56,7 @@ uartputc(int c)
 
   if(!uart)
     return;
+  // #define COM1    0x3f8
   for(i = 0; i < 128 && !(inb(COM1+5) & 0x20); i++)
     microdelay(10);
   outb(COM1+0, c);
