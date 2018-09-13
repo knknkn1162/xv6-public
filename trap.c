@@ -26,6 +26,7 @@ tvinit(void)
 
   for(i = 0; i < 256; i++)
     // #define SETGATE(gate, istrap, sel, off, d)
+    // istrap: 1 for a trap (= exception) gate, 0 for an interrupt gate.
     // 0 for an interrupt gate.
     // #define SEG_KCODE 1  // kernel code
     SETGATE(idt[i], 0, SEG_KCODE<<3, vectors[i], 0);

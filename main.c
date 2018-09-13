@@ -47,7 +47,9 @@ main(void)
   pinit();         // process table
 
   // setup the 256 entries in the table IDT(Interrupt descriptor table)
+  // set interrupt gate & trap gate
   tvinit();        // trap vectors
+  //   // Create linked list of buffer cache
   binit();         // buffer cache
   fileinit();      // file table
   // initialize the Disk Driver(IDE: Integrated Device Electronics)

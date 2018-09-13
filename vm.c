@@ -56,6 +56,7 @@ walkpgdir(pde_t *pgdir, const void *va, int alloc)
     // be further restricted by the permissions in the page table
     // entries, if necessary.
     // #define PTE_U           0x004   // User
+    // PTE_PS: enables 4Mbyte tables. Now the flag is turned off and 4Kbyte pages
     *pde = V2P(pgtab) | PTE_P | PTE_W | PTE_U;
   }
   return &pgtab[PTX(va)];
