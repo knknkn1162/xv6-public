@@ -134,8 +134,10 @@ cgaputc(int c)
   int pos;
 
   // Cursor position: col + 80*row.
+  // Cursor Location High
   outb(CRTPORT, 14);
   pos = inb(CRTPORT+1) << 8;
+  // Cursor Location Low
   outb(CRTPORT, 15);
   pos |= inb(CRTPORT+1);
 
@@ -144,6 +146,7 @@ cgaputc(int c)
   else if(c == BACKSPACE){
     if(pos > 0) --pos;
   } else
+    // Foreground color: 8-11
     crt[pos++] = (c&0xff) | 0x0700;  // black on white
 
   if(pos < 0 || pos > 25*80)
@@ -252,6 +255,7 @@ consoleread(struct inode *ip, char *dst, int n)
       sleep(&input.r, &cons.lock);
     }
     c = input.buf[input.r++ % INPUT_BUF];
+    // #define C(x)  ((x)-'@')  // Control-x
     if(c == C('D')){  // EOF
       if(n < target){
         // Save ^D for next time, to make sure

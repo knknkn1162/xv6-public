@@ -51,6 +51,7 @@ main(void)
   tvinit();        // trap vectors
   //   // Create linked list of buffer cache
   binit();         // buffer cache
+  // only filetable lock
   fileinit();      // file table
   // initialize the Disk Driver(IDE: Integrated Device Electronics)
   // Check if disk 1 is present
