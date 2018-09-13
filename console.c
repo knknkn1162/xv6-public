@@ -135,6 +135,7 @@ cgaputc(int c)
 
   // Cursor position: col + 80*row.
   // Cursor Location High
+  // #define CRTPORT 0x3d4
   outb(CRTPORT, 14);
   pos = inb(CRTPORT+1) << 8;
   // Cursor Location Low

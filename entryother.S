@@ -35,6 +35,7 @@ start:
   # effective memory map doesn't change during the transition.
   lgdt    gdtdesc
   movl    %cr0, %eax
+  // #define CR0_PE          0x00000001      // Protection Enable
   orl     $CR0_PE, %eax
   movl    %eax, %cr0
 
@@ -72,10 +73,14 @@ start32:
   # Call mpenter()
   call	 *(start-8)
 
+  # For more information, see http://bochs.sourceforge.net/doc/docbook/development/debugger-advanced.html
+  # Port 0x8A00 servers as command register. You can use it to enable the i/o interface, change which data register is active, etc.
   movw    $0x8a00, %ax
   movw    %ax, %dx
-  outw    %ax, %dx
-  movw    $0x8ae0, %ax
+# Used to enable the device. Any I/O to the debug module before this command is sent is sent will simply be ignored.
+  outw    %ax, %dx # 0x8a00 -> port 0x8a00
+  movw    $0x8ae0, %ax # # 0x8ae0 -> port 0x8a00
+  # If the debugger is enabled (via --enable-debugger), sending 0x8AE0 to port 0x8A00 after the device has been enabled will return the Bochs to the debugger prompt. Basically the same as doing CTRL+C.
   outw    %ax, %dx
 spin:
   jmp     spin
@@ -83,8 +88,8 @@ spin:
 .p2align 2
 gdt:
   SEG_NULLASM
-  SEG_ASM(STA_X|STA_R, 0, 0xffffffff)
-  SEG_ASM(STA_W, 0, 0xffffffff)
+  SEG_ASM(STA_X|STA_R, 0, 0xffffffff) // type: code
+  SEG_ASM(STA_W, 0, 0xffffffff) // type: data
 
 
 gdtdesc:

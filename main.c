@@ -100,6 +100,7 @@ startothers(void)
   char *stack;
 
   // Write entry code to unused memory at 0x7000.
+  // 0x00000500 ~ 0x00007BFF: guaranteed free for use
   // The linker has placed the image of entryother.S in
   // _binary_entryother_start.
   code = P2V(0x7000);

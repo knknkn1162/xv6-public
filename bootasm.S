@@ -86,9 +86,12 @@ start32:
   movl    $start, %esp
   call    bootmain
 
+  # For more information, see http://bochs.sourceforge.net/doc/docbook/development/debugger-advanced.html
   # If bootmain returns (it shouldn't), trigger a Bochs
+  # Port 0x8A00 servers as command register. You can use it to enable the i/o interface, change which data register is active, etc.
   # Bochs is a highly portable open source IA-32 (x86) PC emulator
   # breakpoint if running under Bochs, then loop.
+  # Used to enable the device. Any I/O to the debug module before this command is sent is sent will simply be ignored.
   movw    $0x8a00, %ax            # 0x8a00 -> port 0x8a00
   movw    %ax, %dx
   outw    %ax, %dx

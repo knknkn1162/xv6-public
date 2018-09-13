@@ -140,6 +140,7 @@ microdelay(int us)
 
 // Start additional processor running entry code at addr.
 // See Appendix B of MultiProcessor Specification.
+//     lapicstartap(c->apicid, V2P(code));
 void
 lapicstartap(uchar apicid, uint addr)
 {
@@ -150,8 +151,11 @@ lapicstartap(uchar apicid, uint addr)
   // and the warm reset vector (DWORD based at 40:67) to point at
   // the AP startup code prior to the [universal startup algorithm]."
   // see http://bochs.sourceforge.net/techspec/CMOS-reference.txt and http://www.bioscentral.com/misc/cmosmap.htm
+  // any write to 0070(CMOS RAM index register port) should be followed by an action to 0071 or the RTC wil be left in an unknown state.
   outb(CMOS_PORT, 0xF);  // offset 0xF is shutdown code
   outb(CMOS_PORT+1, 0x0A);
+
+  // JMP to Dword ptr at 40:67 without EOI
   wrv = (ushort*)P2V((0x40<<4 | 0x67));  // Warm reset vector
   wrv[0] = 0;
   wrv[1] = addr >> 4;
@@ -159,8 +163,14 @@ lapicstartap(uchar apicid, uint addr)
   // "Universal startup algorithm."
   // Send INIT (level-triggered) interrupt to reset other CPU.
   // #define ICRHI   (0x0310/4)   // Interrupt Command [63:32]
+  // Destination: Specifies the target processor or processors.
   lapicw(ICRHI, apicid<<24);
-  // #define ICRLO   (0x0300/4)   // Interrupt Command
+  // #define ICRLO   (0x0300/4)   // Interrupt Command [0:31]
+  // See Intel SDM vol3 Ch.10.6.1
+  // Delivers an INIT request to the target processor or processors, which causes them to perform an INIT. As a result of this IPI(interprocessor interrupts) message, all the tar- get processors perform an INIT.
+  // #define INIT       0x00000500   // INIT/RESET
+  // #define LEVEL      0x00008000   // Level triggered
+  // #define ASSERT     0x00004000   // Assert interrupt (vs deassert)
   lapicw(ICRLO, INIT | LEVEL | ASSERT);
   microdelay(200);
   lapicw(ICRLO, INIT | LEVEL);
@@ -173,6 +183,8 @@ lapicstartap(uchar apicid, uint addr)
   // Bochs complains about the second one.  Too bad for Bochs.
   for(i = 0; i < 2; i++){
     lapicw(ICRHI, apicid<<24);
+    // Sends a special “start-up” IPI (called a SIPI) to the target processor or processors. The vector typically points to a start-up routine that is part of the BIOS boot-strap code (see Section 8.4, “Multiple-Processor (MP) Ini- tialization”).
+    // The vector number, or starting page number for SIPIs
     lapicw(ICRLO, STARTUP | (addr>>12));
     microdelay(200);
   }
