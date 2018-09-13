@@ -149,6 +149,7 @@ lapicstartap(uchar apicid, uint addr)
   // "The BSP must initialize CMOS shutdown code to 0AH
   // and the warm reset vector (DWORD based at 40:67) to point at
   // the AP startup code prior to the [universal startup algorithm]."
+  // see http://bochs.sourceforge.net/techspec/CMOS-reference.txt and http://www.bioscentral.com/misc/cmosmap.htm
   outb(CMOS_PORT, 0xF);  // offset 0xF is shutdown code
   outb(CMOS_PORT+1, 0x0A);
   wrv = (ushort*)P2V((0x40<<4 | 0x67));  // Warm reset vector
@@ -157,7 +158,9 @@ lapicstartap(uchar apicid, uint addr)
 
   // "Universal startup algorithm."
   // Send INIT (level-triggered) interrupt to reset other CPU.
+  // #define ICRHI   (0x0310/4)   // Interrupt Command [63:32]
   lapicw(ICRHI, apicid<<24);
+  // #define ICRLO   (0x0300/4)   // Interrupt Command
   lapicw(ICRLO, INIT | LEVEL | ASSERT);
   microdelay(200);
   lapicw(ICRLO, INIT | LEVEL);

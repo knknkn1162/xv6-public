@@ -67,8 +67,11 @@ main(void)
 static void
 mpenter(void)
 {
+  // set CR3 register
   switchkvm();
+  // Set up CPU's kernel & user's segment descriptors.
   seginit();
+  // set local APIC
   lapicinit();
   mpmain();
 }
@@ -100,6 +103,11 @@ startothers(void)
   // The linker has placed the image of entryother.S in
   // _binary_entryother_start.
   code = P2V(0x7000);
+  /* try `objcopy -I binary -O elf32-i386 -B i386 entryother.o outfile && readelf -s outfile`
+       -B bfdarch
+           Useful when transforming a architecture-less input file into an object file.  In this case the output architecture can be set to bfdarch.  This option will be ignored if the input file has a known bfdarch.  You can access this binary data inside a program by referencing the special symbols that are created by the conversion process.  These symbols are called _binary_objfile_start, _binary_objfile_end and _binary_objfile_size.  e.g. you can transform a picture file into an object file and then access it in your code using these symbols.
+   */
+  /* move to physical memory */
   memmove(code, _binary_entryother_start, (uint)_binary_entryother_size);
 
   for(c = cpus; c < cpus+ncpu; c++){
@@ -114,6 +122,7 @@ startothers(void)
     *(void(**)(void))(code-8) = mpenter;
     *(int**)(code-12) = (void *) V2P(entrypgdir);
 
+    // Start additional processor running entry code at addr.
     lapicstartap(c->apicid, V2P(code));
 
     // wait for cpu to finish mpmain()

@@ -10,7 +10,7 @@
 extern char data[];  // defined by kernel.ld
 pde_t *kpgdir;  // for use in scheduler()
 
-// Set up CPU's kernel segment descriptors.
+// Set up CPU's kernel & user's segment descriptors.
 // Run once on entry on each CPU.
 void
 seginit(void)
