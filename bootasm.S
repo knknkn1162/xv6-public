@@ -60,6 +60,7 @@ seta20.2:
   # #define CR0_PE          0x00000001      // Protection Enable
   # It enables only segment-level protection. paging is not set by default
 # There is no mode bit to disable segmentation. The use of paging, however is optional.(See Intel SDM vol3 Ch3.1)
+# Note) If paging is not used, the linear address space of the processor is mapped directly into the physical address space of processor
   orl     $CR0_PE, %eax
   movl    %eax, %cr0
 
@@ -71,6 +72,9 @@ seta20.2:
   #define SEG_KCODE 1  // kernel code
   # cannot modify %cs directly, so instead the code executes an ljmp instruction
 # set %cs <- $(SEG_CODE<<3) = 0x08, which is at the 2nd GDT entry
+# To implement a basic flat memory model with the IA-32 architecture, at least two segment descriptors must be created, one for referencing a code segment and one for referencing a data segment. See Intel SDM vol3 3.2.1 Basic Flat Model.
+# To implement a flat memory model without paging, software initialization code must at a minimum load a GDT with one code and one data-segment descriptor. A null descriptor in the first GDT entry is also required. The stack can be placed in a normal read/write data segment, so no dedicated descriptor for the stack is required. A flat memory model with paging also requires a page directory and at least one page table(See Intel SDM vol3 ch9.8.1 Protected-Mode System Data Structures)
+  # %cs bit3~15: index, bit2: table indicator flag(0=GDT), RPL(Requested Priviledge Level):0(most privileged level)
   ljmp    $(SEG_KCODE<<3), $start32
 
 .code32  # Tell assembler to generate 32-bit code now.
@@ -106,10 +110,13 @@ spin:
   jmp     spin
 
 # Bootstrap GDT
+# Basic Flat model: hide the segmentation mechanism of the architecture  from both the system designer and the application programmer.
 .p2align 2                                # force 4 byte alignment
 gdt:
   # each entry is 8 byte
   SEG_NULLASM                             # null seg 0x0000 0000 00 00 00 00
+  // #define SEG_ASM(type,base,lim)
+  // segment base address is set to be 0x00
   SEG_ASM(STA_X|STA_R, 0x0, 0xffffffff)   # code seg
   SEG_ASM(STA_W, 0x0, 0xffffffff)         # data seg
 
