@@ -7,7 +7,7 @@
 #define FL_IF           0x00000200      // Interrupt Enable
 
 // Control Register flags
-// It only enables segment-level protection
+// It enables only segment-level protection. paging is not set by default
 #define CR0_PE          0x00000001      // Protection Enable
 // inhitibts supervisor-level procedures from writing into read only pages
 #define CR0_WP          0x00010000      // Write Protect

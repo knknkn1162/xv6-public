@@ -57,7 +57,9 @@ seta20.2:
   # Load the Global Descriptor Table with segment descriptors suitable for code, data, and stack.
   lgdt    gdtdesc
   movl    %cr0, %eax
-  #define CR0_PE          0x00000001      // Protection Enable
+  # #define CR0_PE          0x00000001      // Protection Enable
+  # It enables only segment-level protection. paging is not set by default
+# There is no mode bit to disable segmentation. The use of paging, however is optional.(See Intel SDM vol3 Ch3.1)
   orl     $CR0_PE, %eax
   movl    %eax, %cr0
 

@@ -53,6 +53,8 @@ entry:
   # Turn on page size extension for 4Mbyte pages
   movl    %cr4, %eax
 # #define CR4_PSE         0x00000010      // Page size extension
+  // Enables 4M byte pages when 32-bit paging when set. Note that the pages are not 4M byte without PTE_PS setting
+  // restricts 32-bit paging to pages of 4K bytes when clear
   orl     $(CR4_PSE), %eax
   movl    %eax, %cr4
   # Set page directory(tentative). Later, we are to set cr3 register by switchkvm() in vm.c

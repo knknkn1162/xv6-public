@@ -143,7 +143,7 @@ pde_t entrypgdir[NPDENTRIES] = {
   // (0) | 0x083
   // PTE_P: whether PTE is present
   // PTE_W: instructions are allowed to issue writes to the page
-  // PTE_PS: enables 4Mbyte tables
+  // PTE_PS: enables 4Mbyte tables(when CR4.PSE is set)
   [0] = (0) | PTE_P | PTE_W | PTE_PS,
   // Map VA's [KERNBASE, KERNBASE+4MB) to PA's [0, 4MB)
   // page directory index
