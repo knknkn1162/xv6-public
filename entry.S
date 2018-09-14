@@ -58,6 +58,11 @@ entry:
   orl     $(CR4_PSE), %eax
   movl    %eax, %cr4
   # Set page directory(tentative). Later, we are to set cr3 register by switchkvm() in vm.c
+# The section, SDM vol3 ch 9.8.3 Initializing Paging also says that..
+## Paging is controlled by the PG flag in control register CR0. When this flag is clear (its state following a hardware reset), the paging mechanism is turned off; when it is set, paging is enabled. Before setting the PG flag, the following data structures and registers must be initialized:
+## > Software must load at least one page directory and one page table into physical memory. The page table can be eliminated if the page directory contains a directory entry pointing to itself (here, the page directory and page table reside in the same page), or if only 4-MByte pages are used.(4M byte pages!!)
+## > Control register CR3 (also called the PDBR register) is loaded with the physical base address of the page directory.
+## > (Optional) Software may provide one set of code and data descriptors in the GDT or in an LDT for supervisor mode and another set for user mode.
   // %cr3 must be a physical address
   // paging hardware doen't know how to translate virtual address yet
   // mov    $0x1020c0,%eax
