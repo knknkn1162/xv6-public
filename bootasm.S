@@ -13,6 +13,7 @@
 # see also https://wiki.osdev.org/Memory_Map_(x86)#Overview
 start:
   # when xv6 is ready, it will re-enable interrupts
+  # The IF flag can be set or cleared with the STI (set interrupt-enable flag) and CLI (clear interrupt-enable flag) instructions, respectively.
   cli                         # BIOS enabled interrupts; disable
 
   # Zero data segment registers DS, ES, and SS.
@@ -21,6 +22,9 @@ start:
   movw    %ax,%ds             # -> Data Segment
   movw    %ax,%es             # -> Extra Segment
   movw    %ax,%ss             # -> Stack Segment
+
+  # Summarize) 8086(1MB memory) -> Intel286(16MB memory) .. mask A20 line by default because of compatibility
+  # History) When the IBM-AT (Intel 286) was introduced, it was able to access up to sixteen megabytes of memory (instead of the 1 MByte of the 8086). But to remain compatible with the 8086, a quirk in the 8086 architecture (memory wraparound) had to be duplicated in the AT. To achieve this, the A20 line on the address bus was disabled by default. (see https://wiki.osdev.org/A20_Line )
 
   # Physical address line A20 is tied to zero so that the first PCs 
   # with 2 MB would run software that assumed 1 MB.  Undo that.
@@ -32,7 +36,7 @@ seta20.1:
   # If input buffer is full(bit1 is set), repeat
   jnz     seta20.1
 
-  # the CPU writes to port 0x64, the byte is interpreted as a command byte.
+  # write output port. next byte written  to 0060 will be written to the 804x output port; the original IBM AT and many compatibles use bit 1 of the output port to control the A20 gate.
   # Write output port(P2) ..0xd1
   movb    $0xd1,%al               # 0xd1 -> port 0x64
   outb    %al,$0x64
@@ -44,9 +48,7 @@ seta20.2:
 
   # Command 0xdf: Enable A20 address line
   movb    $0xdf,%al               # 0xdf -> port 0x60
-  # If the CPU writes to port 0x60, the byte is interpreted as a data byte.
-  # WHY?
-  # suppose that It can be read/written by writing 0x20/0x60 to port 0x64 and then reading/writing a data byte from/to port 0x60.
+  # sngl  enable address line A20
   outb    %al,$0x60
 
   # Switch from real to protected mode.  Use a bootstrap GDT that makes

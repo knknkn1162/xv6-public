@@ -86,6 +86,7 @@ allocproc(void)
   return 0;
 
 found:
+  // in the early stages of growth
   p->state = EMBRYO;
   p->pid = nextpid++;
 
@@ -125,9 +126,12 @@ userinit(void)
 
   p = allocproc();
   
+  // static struct proc *initproc;
   initproc = p;
+  // Set up kernel part of a page table.
   if((p->pgdir = setupkvm()) == 0)
     panic("userinit: out of memory?");
+  // Load the initcode into address 0 of pgdir.
   inituvm(p->pgdir, _binary_initcode_start, (int)_binary_initcode_size);
   p->sz = PGSIZE;
   memset(p->tf, 0, sizeof(*p->tf));

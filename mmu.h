@@ -2,11 +2,16 @@
 // x86 memory management unit (MMU).
 
 // Eflags register
+// Controlls the response of the processor to maskable hardware interrupt(Any external interrupt that is delivered to the processor by means of the INTR pin or through the local APIC) requests
+// when the IF flag is set, interrupts delivered to the INTR pin or through the local APIC pin are processed as normal external interrupts.
 #define FL_IF           0x00000200      // Interrupt Enable
 
 // Control Register flags
+// It only enables segment-level protection
 #define CR0_PE          0x00000001      // Protection Enable
+// inhitibts supervisor-level procedures from writing into read only pages
 #define CR0_WP          0x00010000      // Write Protect
+// When paging is disabled, all linear addresses are treated as physical addresses.
 #define CR0_PG          0x80000000      // Paging
 
 #define CR4_PSE         0x00000010      // Page size extension
