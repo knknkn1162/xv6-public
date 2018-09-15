@@ -121,6 +121,7 @@ pushcli(void)
   eflags = readeflags();
   cli();
   if(mycpu()->ncli == 0)
+    //   int intena;                  // Were interrupts enabled before pushcli?
     mycpu()->intena = eflags & FL_IF;
   mycpu()->ncli += 1;
 }

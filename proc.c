@@ -9,6 +9,7 @@
 
 struct {
   struct spinlock lock;
+  // #define NPROC        64  // maximum number of processes
   struct proc proc[NPROC];
 } ptable;
 
@@ -139,6 +140,7 @@ userinit(void)
   p->tf->ds = (SEG_UDATA << 3) | DPL_USER;
   p->tf->es = p->tf->ds;
   p->tf->ss = p->tf->ds;
+  // #define FL_IF           0x00000200      // Interrupt Enable
   p->tf->eflags = FL_IF;
   p->tf->esp = PGSIZE;
   p->tf->eip = 0;  // beginning of initcode.S
@@ -175,6 +177,7 @@ growproc(int n)
   }
   curproc->sz = sz;
   // The x86 hardware caches page table entries in at TLB(Transition Lookaside Buffer), and when xv6 changes the page entries, it must invalidate the cached entrires
+  // See Intel SDM vol3 ch.4.10.2 Translation Lookaside Buffers (TLBs)
   // swtich TSS(Task state segment) and %cr3
   switchuvm(curproc);
   return 0;

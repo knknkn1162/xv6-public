@@ -628,6 +628,8 @@ namex(char *path, int nameiparent, char *name)
   struct inode *ip, *next;
 
   if(*path == '/')
+    // #define ROOTDEV       1  // device number of file system root disk
+    // #define ROOTINO 1  // root i-number
     ip = iget(ROOTDEV, ROOTINO);
   else
     ip = idup(myproc()->cwd);
@@ -661,6 +663,7 @@ struct inode*
 namei(char *path)
 {
   char name[DIRSIZ];
+  // namex(char *path, int nameiparent, char *name)
   return namex(path, 0, name);
 }
 

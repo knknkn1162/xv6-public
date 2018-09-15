@@ -123,6 +123,7 @@ static struct kmap {
    */
 } kmap[] = {
  // #define EXTMEM=0x00100000
+ // ##define KERNBASE 0x80000000         // First kernel virtual address
  { (void*)KERNBASE, 0,             EXTMEM,    PTE_W}, // I/O space
  // #define KERNLINK (KERNBASE+EXTMEM)=0x80100000  // Address where kernel is linked
  { (void*)KERNLINK, V2P(KERNLINK), V2P(data), 0},     // kern text+rodata
@@ -200,10 +201,13 @@ switchuvm(struct proc *p)
   mycpu()->ts.esp0 = (uint)p->kstack + KSTACKSIZE;
   // setting IOPL=0 in eflags *and* iomb beyond the tss segment limit
   // forbids I/O instructions (e.g., inb and outb) from user space
+  // I/O map base address field — Contains a 16-bit offset from the base of the TSS to the I/O permission bit map and interrupt redirection bitmap.
   mycpu()->ts.iomb = (ushort) 0xFFFF;
   //0x101 << 3
+  //  asm volatile("ltr %0" : : "r" (sel)); // Load Task Register
   ltr(SEG_TSS << 3);
   //   asm volatile("movl %0,%%cr3" : : "r" (val));
+  // change Page Directory Base Register
   lcr3(V2P(p->pgdir));  // switch to process's address space
   popcli();
 }
@@ -220,6 +224,7 @@ inituvm(pde_t *pgdir, char *init, uint sz)
   mem = kalloc();
   memset(mem, 0, PGSIZE);
   // PTE_W: writable, PTE_U: user
+  // mappages(pde_t *pgdir, void *va, uint size, uint pa, int perm)
   mappages(pgdir, 0, PGSIZE, V2P(mem), PTE_W|PTE_U);
   memmove(mem, init, sz);
 }
