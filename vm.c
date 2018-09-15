@@ -197,14 +197,17 @@ switchuvm(struct proc *p)
   //   uint s : 1;          // 0 = system, 1 = application
   mycpu()->gdt[SEG_TSS].s = 0;
   // 0x10000
+  //   struct taskstate ts;         // Used by x86 to find stack for interrupt
   mycpu()->ts.ss0 = SEG_KDATA << 3;
+  // uint esp0;         // Stack pointers and segment selectors
   mycpu()->ts.esp0 = (uint)p->kstack + KSTACKSIZE;
   // setting IOPL=0 in eflags *and* iomb beyond the tss segment limit
   // forbids I/O instructions (e.g., inb and outb) from user space
-  // I/O map base address field — Contains a 16-bit offset from the base of the TSS to the I/O permission bit map and interrupt redirection bitmap.
+  // I/O map base address field — Contains a 16-bit offset from the base of the TSS to the I/O permission bit map and interrupt redirection bitmap. Set max value to ignore
   mycpu()->ts.iomb = (ushort) 0xFFFF;
   //0x101 << 3
   //  asm volatile("ltr %0" : : "r" (sel)); // Load Task Register
+  // The contents of Task register is segment selector. See Intel SDM vol.3 Fig2.6 and Ch2.4.4
   ltr(SEG_TSS << 3);
   //   asm volatile("movl %0,%%cr3" : : "r" (val));
   // change Page Directory Base Register
