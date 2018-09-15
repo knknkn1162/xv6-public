@@ -355,6 +355,7 @@ scheduler(void)
       p->state = RUNNING;
 
       // switch current context to next context
+      // void swtch(struct context **old, struct context *new);
       swtch(&(c->scheduler), p->context);
       switchkvm(); // switch page table
 

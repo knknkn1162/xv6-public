@@ -32,8 +32,18 @@ swtch:
   movl %edx, %esp
 
   # Load new callee-saved registers
+  /*
+struct context {
+  uint edi;
+  uint esi;
+  uint ebx;
+  uint ebp;
+  uint eip;
+};
+  */
   popl %edi
   popl %esi
   popl %ebx
   popl %ebp
+  // now eip=forkret
   ret

@@ -30,4 +30,10 @@ trapret:
   popl %ds
   addl $0x8, %esp  # trapno and errcode
   // jump back into user space
+  // it restores the saved flags(NT flag) into the EFLAGS register.
+  // NT: Controls the chaining of interrupted and called tasks. The processor sets this flag on calls to a task initiated with a CALL instruction, an interrupt, or an exception. It examines and modifies this flag on returns from a task initiated with the IRET instruction.
+  // set up the stack as if an exception in user mode had occurred, then executing an exception return instruction (IRET).
+  // stack pointer to IRET
+  // --> High
+  // EIP - CS - EFLAGS - ESP - SS
   iret

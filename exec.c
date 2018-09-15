@@ -56,6 +56,7 @@ exec(char *path, char **argv)
       goto bad;
     if(ph.vaddr % PGSIZE != 0)
       goto bad;
+    // loaduvm(pde_t *pgdir, char *addr, struct inode *ip, uint offset, uint sz)
     if(loaduvm(pgdir, (char*)ph.vaddr, ip, ph.off, ph.filesz) < 0)
       goto bad;
   }
@@ -107,6 +108,7 @@ exec(char *path, char **argv)
   curproc->tf->esp = sp;
   switchuvm(curproc);
   freevm(oldpgdir);
+  // It should never ends when init process... why?
   return 0;
 
  bad:

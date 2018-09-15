@@ -192,6 +192,7 @@ switchuvm(struct proc *p)
   pushcli();
   // #define SEG_TSS   5  // this process's task state
   // #define SEG16(type, base, lim, dpl) (struct segdesc)
+  // #define STS_T32A    0x9     // Available 32-bit TSS
   mycpu()->gdt[SEG_TSS] = SEG16(STS_T32A, &mycpu()->ts,
                                 sizeof(mycpu()->ts)-1, 0);
   //   uint s : 1;          // 0 = system, 1 = application

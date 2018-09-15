@@ -18,7 +18,7 @@ start:
   // 3. save %esp and %ss in CPU-internal registers only if PL < CPL
   // 4. load %ss and %sep from a task segment desc
   // 5. push %ps, %esp, %eflags, %cs, %eip
-  // 6. clear the IF bit in %eflags
+  // 6. clear the IF(Interrupt enable flag) bit in %eflags
   // 7. set %cs and %eip to the values in the decsciptor. %eip register tells the computer where to go next to execute the next command and controls the flow of a program.
 
   // [software]
