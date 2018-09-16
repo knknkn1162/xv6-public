@@ -166,6 +166,7 @@ kvmalloc(void)
   // set Page Directory Entries in the global variable
   kpgdir = setupkvm();
   // setup CR3 register
+  // another use are mpenter() and scheduler(). The latter use is more important,
   switchkvm();
 }
 

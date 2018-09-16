@@ -24,6 +24,8 @@
 #include "param.h"
 
 # Multiboot header.  Data to direct multiboot loader.
+# See the link, https://www.gnu.org/software/grub/manual/multiboot/multiboot.html.
+
 # The Multiboot header must be contained completely within the first 8192 bytes of the OS image, and must be longword (32-bit) aligned. In general, it should come as early as possible, and may be embedded in the beginning of the text segment after the real executable header.
 .p2align 2
 .text
