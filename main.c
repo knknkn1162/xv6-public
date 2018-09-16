@@ -84,6 +84,7 @@ mpmain(void)
   cprintf("cpu%d: starting %d\n", cpuid(), cpuid());
   // vector 32(=IRQ 0) is an interrupt gate
   idtinit();       // load idt register
+  // when the BSP(bootstrap processor) and the application processor(AP) are initialized, the BSP then begins executing the OS initialization code.
   xchg(&(mycpu()->started), 1); // tell startothers() we're up
   // scheduler enables interrupts
   scheduler();     // start running processes

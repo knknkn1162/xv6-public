@@ -187,6 +187,7 @@ lapicstartap(uchar apicid, uint addr)
     lapicw(ICRHI, apicid<<24);
     // Sends a special “start-up” IPI (called a SIPI) to the target processor or processors. The vector typically points to a start-up routine that is part of the BIOS boot-strap code (see Section 8.4, “Multiple-Processor (MP) Ini- tialization”).
     // The vector number, or starting page number for SIPIs
+    // #define ICRLO   (0x0300/4)   // Interrupt Command
     lapicw(ICRLO, STARTUP | (addr>>12));
     microdelay(200);
   }

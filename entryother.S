@@ -7,6 +7,7 @@
 # Specification says that the AP will start in real mode with CS:IP
 # set to XY00:0000, where XY is an 8-bit value sent with the
 # STARTUP. Thus this code must start at a 4096-byte boundary.
+# See Intel SDM vol.3 ch.8.11.2 MP Initialization Protocol Algorithm
 #
 # Because this code sets DS to zero, it must sit
 # at an address in the low 2^16 bytes.
