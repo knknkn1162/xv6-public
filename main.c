@@ -27,7 +27,7 @@ main(void)
   // using entrypgdir to place just the pages
   // free address at end=ceil(x801020c0)(=0x80103000) ~ 0x80503000
   // At this stage, pgdir is defined at 0x80000000~0x80400000,
-  // so the actual range is 0x00103000~0x00400000.
+  // so the actual range is 0x00103000~0x00200000.
   kinit1(end, P2V(4*1024*1024)); // phys page allocator
   kvmalloc();      // kernel page table
   mpinit();        // detect other processors
@@ -58,6 +58,7 @@ main(void)
   ideinit();       // disk 
   startothers();   // start other processors
   // enable locking and arrange for more memory to be allocate
+  // release reminder memory
   kinit2(P2V(4*1024*1024), P2V(PHYSTOP)); // must come after startothers()
   userinit();      // first user process
   mpmain();        // finish this processor's setup
@@ -126,7 +127,7 @@ startothers(void)
     // Start additional processor running entry code at addr.
     lapicstartap(c->apicid, V2P(code));
 
-    // wait for cpu to finish mpmain()
+    // wait for cpu to finish mpmain():86
     while(c->started == 0)
       ;
   }

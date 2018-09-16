@@ -110,7 +110,7 @@ mpinit(void)
   // find Processor or I/O APIC
   for(p=(uchar*)(conf+1), e=(uchar*)conf+conf->length; p<e; ){
     switch(*p){
-    // TODO: Does this contain self cpu information?
+    // TODO: Does this contain self cpu information? -> YES!
     case MPPROC:
       proc = (struct mpproc*)p;
       if(ncpu < NCPU) {

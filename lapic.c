@@ -99,7 +99,9 @@ lapicinit(void)
   lapicw(EOI, 0);
 
   // Send an Init Level De-Assert to synchronise arbitration ID's.
+  // #define ICRHI   (0x0310/4)   // Interrupt Command [63:32]
   lapicw(ICRHI, 0);
+  //   #define BCAST      0x00080000   // Send to all APICs, including self.
   lapicw(ICRLO, BCAST | INIT | LEVEL);
   // #define ICRLO   (0x0300/4)   // Interrupt Command
   // #define DELIVS     0x00001000   // Delivery status

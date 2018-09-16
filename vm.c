@@ -124,12 +124,12 @@ static struct kmap {
 } kmap[] = {
  // #define EXTMEM=0x00100000
  // ##define KERNBASE 0x80000000         // First kernel virtual address
- { (void*)KERNBASE, 0,             EXTMEM,    PTE_W}, // I/O space
+ { (void*)KERNBASE, 0,             EXTMEM,    PTE_W}, // I/O space (0x80000000 ~ 0x80100000)
  // #define KERNLINK (KERNBASE+EXTMEM)=0x80100000  // Address where kernel is linked
- { (void*)KERNLINK, V2P(KERNLINK), V2P(data), 0},     // kern text+rodata
- { (void*)data,     V2P(data),     PHYSTOP,   PTE_W}, // kern data+memory
+ { (void*)KERNLINK, V2P(KERNLINK), V2P(data), 0},     // kern text+rodata (0x80100000 ~ 0x80102000)
+ { (void*)data,     V2P(data),     PHYSTOP,   PTE_W}, // kern data+memory (0x80102000 ~ 0x8E000000)
  // #define DEVSPACE 0xFE000000         // Other devices are at high addresses
- { (void*)DEVSPACE, DEVSPACE,      0,         PTE_W}, // more devices
+ { (void*)DEVSPACE, DEVSPACE,      0,         PTE_W}, // more devices (0xFE000000 ~ 0xFFFFFFFF)
 };
 
 // Set up kernel part of a page table.
