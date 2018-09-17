@@ -66,7 +66,12 @@ ioapicinit(void)
   // Mark all interrupts edge-triggered, active high, disabled,
   // and not routed to any CPUs.
   // #define REG_TABLE  0x10  // Redirection table base
+  // This behavior is identical to the case where the device withdraws the interrupt before that interrupt is posted to the processor. **It is software's responsibility to handle the case where the mask bit is set** after the interrupt message has been accepted by a local APIC unit but before the interrupt is dispensed to the processor.
+  // xv6 programs to map interrupt 0 to IRQ 0, and so on, but disables them all. Specific devices enable particular interrupts and say to which processor the interrupt should be routed. For example, xv6 routes keyboard interrupts to processor 0 (8274). Xv6 routes disk interrupts to the highest numbered processor on the system..
   for(i = 0; i <= maxintr; i++){
+    // See IOAPIC Specification ch.3.2.4. IOREDTBL
+    // #define INT_DISABLED   0x00010000  // Interrupt disabled
+    // #define T_IRQ0          32      // IRQ 0 corresponds to int T_IRQ
     ioapicwrite(REG_TABLE+2*i, INT_DISABLED | (T_IRQ0 + i));
     ioapicwrite(REG_TABLE+2*i+1, 0);
   }

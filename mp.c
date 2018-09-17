@@ -13,6 +13,7 @@
 
 struct cpu cpus[NCPU];
 int ncpu;
+// Assume that there is only one I/O APIC.
 uchar ioapicid;
 
 static uchar
@@ -60,6 +61,7 @@ mpsearch(void)
     if((mp = mpsearch1(p, 1024)))
       return mp;
   } else {
+    // Memory size in Kbytes
     p = ((bda[0x14]<<8)|bda[0x13])*1024;
     if((mp = mpsearch1(p-1024, 1024)))
       return mp;
@@ -162,6 +164,8 @@ mpinit(void)
   if(!ismp)
     panic("Didn't find a suitable machine");
 
+  // IMCR: interrupt mode configuration register: corporate with 8259A-EQUIVALENT PICS
+  // IMCRP. When the IMCR presence bit is set, the IMCR is present and PIC Mode is implemented; otherwise, Virtual Wire Mode is implemented.
   if(mp->imcrp){
     // Bochs doesn't support IMCR, so this doesn't run on Bochs.
     // But it would on real hardware.

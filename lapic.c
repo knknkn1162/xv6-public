@@ -20,6 +20,7 @@
   #define ENABLE     0x00000100   // Unit Enable
 #define ESR     (0x0280/4)   // Error Status
 #define ICRLO   (0x0300/4)   // Interrupt Command
+  // Interprocessor Interrupts
   #define INIT       0x00000500   // INIT/RESET
   #define STARTUP    0x00000600   // Startup IPI
   #define DELIVS     0x00001000   // Delivery status
@@ -152,7 +153,7 @@ lapicstartap(uchar apicid, uint addr)
   // "The BSP must initialize CMOS shutdown code to 0AH
   // and the warm reset vector (DWORD based at 40:67) to point at
   // the AP startup code prior to the [universal startup algorithm]."
-  // see http://bochs.sourceforge.net/techspec/CMOS-reference.txt and http://www.bioscentral.com/misc/cmosmap.htm
+  // see http://bochs.sourceforge.net/techspec/CMOS-reference.txt or MultiProcessor-Specification ver1.4 B.4 ApplicationProcessorStartup
   // any write to 0070(CMOS RAM index register port) should be followed by an action to 0071 or the RTC wil be left in an unknown state.
   outb(CMOS_PORT, 0xF);  // offset 0xF is shutdown code
   outb(CMOS_PORT+1, 0x0A);
@@ -191,6 +192,7 @@ lapicstartap(uchar apicid, uint addr)
     lapicw(ICRLO, STARTUP | (addr>>12));
     microdelay(200);
   }
+  // The operating system is responsible for determining whether the IPI was received by the targeted AP and executed successfully. For example, the operating system can define a status flag for each processor. After being awakened, a processor sets its status flag, indicating to the operating system that it is present and running.
 }
 
 #define CMOS_STATA   0x0a
