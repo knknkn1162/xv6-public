@@ -401,6 +401,7 @@ sys_exec(void)
   int i;
   uint uargv, uarg;
 
+  // fetch from user stack
   if(argstr(0, &path) < 0 || argint(1, (int*)&uargv) < 0){
     return -1;
   }

@@ -50,6 +50,7 @@ int
 argint(int n, int *ip)
 {
   // if n= 0, ip = &arg0, put arg0 in the value
+  // Note that tf->esp is the address before `int $SYS_CALL`, that is the user address.
   return fetchint((myproc()->tf->esp) + 4 + 4*n, ip);
 }
 

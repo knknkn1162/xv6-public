@@ -7,6 +7,7 @@
 #include "x86.h"
 #include "elf.h"
 
+// e.g) path = "init\0", argv={"init", NULL}, argc=2
 int
 exec(char *path, char **argv)
 {
@@ -32,6 +33,7 @@ exec(char *path, char **argv)
   pgdir = 0;
 
   // Check ELF header
+  // ip: inode
   if(readi(ip, (char*)&elf, 0, sizeof(elf)) != sizeof(elf))
     goto bad;
   if(elf.magic != ELF_MAGIC)
@@ -52,6 +54,9 @@ exec(char *path, char **argv)
     // whether  the sum overflows a 32bit interger
     if(ph.vaddr + ph.memsz < ph.vaddr)
       goto bad;
+    // sz = ph.vaddr + ph.memsz
+    // allocuvm(pde_t *pgdir, uint oldsz, uint newsz)
+    // //     if(mappages(pgdir, (char*)a, PGSIZE, V2P(mem), PTE_W|PTE_U) < 0){
     if((sz = allocuvm(pgdir, sz, ph.vaddr + ph.memsz)) == 0)
       goto bad;
     if(ph.vaddr % PGSIZE != 0)
@@ -67,10 +72,11 @@ exec(char *path, char **argv)
   // Allocate two pages at the next page boundary.
   // Make the first inaccessible.  Use the second as the user stack.
   sz = PGROUNDUP(sz);
+  // sze = sz + 2*PGSIZE
   if((sz = allocuvm(pgdir, sz, sz + 2*PGSIZE)) == 0)
     goto bad;
 
-  // Clear PTE_U on a page. Used to create an inaccessible
+  // Clear PTE_U(User) on a page. Used to create an inaccessible
   clearpteu(pgdir, (char*)(sz - 2*PGSIZE));
   sp = sz;
 
@@ -105,6 +111,7 @@ exec(char *path, char **argv)
   curproc->pgdir = pgdir;
   curproc->sz = sz;
   curproc->tf->eip = elf.entry;  // main
+  // userstack
   curproc->tf->esp = sp;
   switchuvm(curproc);
   freevm(oldpgdir);
