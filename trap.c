@@ -29,6 +29,7 @@ tvinit(void)
     // istrap: 1 for a trap (= exception) gate, 0 for an interrupt gate.
     // 0 for an interrupt gate.
     // #define SEG_KCODE 1  // kernel code
+    // Code segment selector
     SETGATE(idt[i], 0, SEG_KCODE<<3, vectors[i], 0);
   // interrupt gate
   // Trap gates don't clear the EFLAG, allowing other interrupts during the system call handler, whereas interrupts set the EFLAG.

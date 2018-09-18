@@ -298,6 +298,7 @@ consoleinit(void)
   initlock(&cons.lock, "console");
 
   // #define CONSOLE 1
+  // Use this with readi() or writei() function such as `devsw[ip->major].read(ip, dst, n);`
   devsw[CONSOLE].write = consolewrite;
   devsw[CONSOLE].read = consoleread;
   cons.locking = 1;

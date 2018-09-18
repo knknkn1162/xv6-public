@@ -55,6 +55,7 @@ main(void)
   fileinit();      // file table
   // initialize the Disk Driver(IDE: Integrated Device Electronics)
   // Check if disk 1 is present
+  // polls the status bits until the busy bit is clear and the ready byit is set
   ideinit();       // disk 
   startothers();   // start other processors
   // enable locking and arrange for more memory to be allocate

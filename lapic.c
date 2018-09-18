@@ -74,6 +74,7 @@ lapicinit(void)
   // periodically generate an interrrupt at IRQ_TIMER, which is IRQ 0.
   // #define IRQ_TIMER        0
   // #define T_IRQ0          32      // IRQ 0 corresponds to int T_IRQ
+  // #define TIMER   (0x0320/4)   // Local Vector Table 0 (TIMER)
   lapicw(TIMER, PERIODIC | (T_IRQ0 + IRQ_TIMER));
   // #define TICR    (0x0380/4)   // Timer Initial Count
   lapicw(TICR, 10000000);
@@ -86,6 +87,7 @@ lapicinit(void)
   // Disable performance counter overflow interrupts
   // on machines that provide that interrupt entry.
   #define VER     (0x0030/4)   // Version
+  // #define PCINT   (0x0340/4)   // Performance Counter LVT
   if(((lapic[VER]>>16) & 0xFF) >= 4)
     lapicw(PCINT, MASKED);
 
@@ -93,19 +95,26 @@ lapicinit(void)
   lapicw(ERROR, T_IRQ0 + IRQ_ERROR);
 
   // Clear error status register (requires back-to-back writes).
+  // #define ESR     (0x0280/4)   // Error Status
   lapicw(ESR, 0);
   lapicw(ESR, 0);
 
   // Ack any outstanding interrupts.
+  // #define EOI     (0x00B0/4)   // EOI
   lapicw(EOI, 0);
 
   // Send an Init Level De-Assert to synchronise arbitration ID's.
   // #define ICRHI   (0x0310/4)   // Interrupt Command [63:32]
+  // This field is only used when the destination shorthand field is set to 00B.
   lapicw(ICRHI, 0);
   //   #define BCAST      0x00080000   // Send to all APICs, including self.
+  // Destination Shorthand: BCAST: 10
+  // Delivery Mode: 101: INIT
+  // Trigger Mode: 1: Level(bit:15)
   lapicw(ICRLO, BCAST | INIT | LEVEL);
   // #define ICRLO   (0x0300/4)   // Interrupt Command
   // #define DELIVS     0x00001000   // Delivery status
+  // while 1 (Send Pending) indicates that this local APIC has not completed sending the last IPI.
   while(lapic[ICRLO] & DELIVS)
     ;
 
