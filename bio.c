@@ -42,6 +42,7 @@
 struct {
   struct spinlock lock;
   #define NBUF         (MAXOPBLOCKS*3)  // size of disk block cache
+  // #define MAXOPBLOCKS  10  // max # of blocks any FS op writes
   struct buf buf[NBUF];
 
   // Linked list of all buffers, through prev/next.
@@ -105,6 +106,11 @@ bget(uint dev, uint blockno)
   }
   panic("bget: no buffers");
 }
+
+/*
+ bread, bwrite -> iderw -> idestart
+ trap(T_IRQ0 + IRQ_IDE) -> ideintr -> idestart
+ */
 
 // Return a locked buf with the contents of the indicated block.
 struct buf*
