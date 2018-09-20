@@ -109,7 +109,7 @@ bget(uint dev, uint blockno)
 
 /*
  bread, bwrite -> iderw -> idestart
- trap(T_IRQ0 + IRQ_IDE) -> ideintr -> idestart
+ trap (T_IRQ0 + IRQ_IDE) -> ideintr -> idestart
  */
 
 // Return a locked buf with the contents of the indicated block.
