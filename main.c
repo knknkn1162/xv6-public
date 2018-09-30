@@ -27,8 +27,8 @@ main(void)
   // using entrypgdir to place just the pages
   // free address at end=ceil(x801020c0)(=0x80103000) ~ 0x80503000
   // At this stage, pgdir is defined at 0x80000000~0x80400000,
-  // so the actual range is 0x00103000~0x00200000.
   kinit1(end, P2V(4*1024*1024)); // phys page allocator
+
   kvmalloc();      // kernel page table
   mpinit();        // detect other processors
   /* ignores interrupts from the PIC, and configures the IOAPIC and local APIC */
