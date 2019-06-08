@@ -22,7 +22,7 @@ start:
   # with 2 MB would run software that assumed 1 MB.  Undo that.
 seta20.1:
   inb     $0x64,%al               # Wait for not busy
-  testb   $0x2,%al
+  testb   $0x1,%al
   jnz     seta20.1
 
   movb    $0xd1,%al               # 0xd1 -> port 0x64
@@ -30,7 +30,7 @@ seta20.1:
 
 seta20.2:
   inb     $0x64,%al               # Wait for not busy
-  testb   $0x2,%al
+  testb   $0x1,%al
   jnz     seta20.2
 
   movb    $0xdf,%al               # 0xdf -> port 0x60
