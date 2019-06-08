@@ -38,6 +38,10 @@ for(my $i = 0; $i < 256; $i++){
 #     pushl $0
 #     jmp alltraps
 #   ...
+#   vector20:
+#     # push 20 as argument
+#     pushl $20
+#     jmp alltraps
 #   
 #   # vector table
 #   .data

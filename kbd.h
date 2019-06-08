@@ -1,7 +1,10 @@
 // PC keyboard interface constants
 
+// st = inb(KBSTATP); in kbdgetc
 #define KBSTATP         0x64    // kbd controller status port(I)
+// if((st & KBS_DIB) == 0) in kbdgetc(void)
 #define KBS_DIB         0x01    // kbd data in buffer
+// data = inb(KBDATAP); in kbdgetc(void)
 #define KBDATAP         0x60    // kbd data port(I)
 
 #define NO              0

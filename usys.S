@@ -29,3 +29,9 @@ SYSCALL(getpid)
 SYSCALL(sbrk)
 SYSCALL(sleep)
 SYSCALL(uptime)
+
+/*
+.globl mknod;
+mknod:
+  mov $SYS_mknod, %eax
+*/

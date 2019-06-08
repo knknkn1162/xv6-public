@@ -93,6 +93,7 @@ mpconfig(struct mp **pmp)
   *pmp = mp;
   return conf;
 }
+struct mp *gmp;
 
 void
 mpinit(void)
@@ -106,6 +107,7 @@ mpinit(void)
 
   if((conf = mpconfig(&mp)) == 0)
     panic("Expect to run on an SMP");
+  gmp = mp;
   ismp = 1;
   // [global] The base address by which each processor accesses its local APIC.
   lapic = (uint*)conf->lapicaddr;
@@ -171,6 +173,7 @@ mpinit(void)
     // Bochs doesn't support IMCR, so this doesn't run on Bochs.
     // But it would on real hardware.
     outb(0x22, 0x70);   // Select IMCR
+    // write imcr's data register
     outb(0x23, inb(0x23) | 1);  // Mask external interrupts.
   }
 }

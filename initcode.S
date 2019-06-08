@@ -14,12 +14,12 @@ start:
   movl $SYS_exec, %eax
   // [hardware]
   // 1. fetch the n'th descriptor from the IDT, where n is the arguement of `int`
-  // 2. check that CPL in %cs is DPL
+  // 2. check that CPL in %cs(in IDT) is DPL
   // 3. save %esp and %ss in CPU-internal registers only if PL < CPL
   // 4. load %ss and %sep from a task segment desc
   // 5. push %ps, %esp, %eflags, %cs, %eip
   // 6. clear the IF(Interrupt enable flag) bit in %eflags
-  // 7. set %cs and %eip to the values in the decsciptor. %eip register tells the computer where to go next to execute the next command and controls the flow of a program.
+  // 7. set %cs and %eip to the values in the TSS. %eip register tells the computer where to go next to execute the next command and controls the flow of a program.
 
   // [software]
   // 8. call vector60

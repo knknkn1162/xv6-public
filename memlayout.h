@@ -1,7 +1,8 @@
 // Memory layout
 
 #define EXTMEM  0x100000            // Start of extended memory
-#define PHYSTOP 0xE000000           // Top physical memory
+// smaller than two gigabytes - 16 megabytes (for the device memory).
+#define PHYSTOP 0xE000000           // Top physical memory(224MB)
 #define DEVSPACE 0xFE000000         // Other devices are at high addresses
 
 // Key addresses for address space layout (see kmap in vm.c for layout)

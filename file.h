@@ -22,6 +22,8 @@ struct inode {
   short minor;
   short nlink;
   uint size;
+  // The first NDIRECT(12) block numbers are listed in addrs[0...NDIRECT-1]
+  // The next NINDIRECT(128) blocks are listed in block ip->addrs[NDIRECT].
   uint addrs[NDIRECT+1];
 };
 

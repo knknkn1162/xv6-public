@@ -72,8 +72,8 @@ entry:
   movl    %eax, %cr3
   # Turn on paging.
   movl    %cr0, %eax
-# #define CR0_PG          0x80000000      // Paging
-# #define CR0_WP          0x00010000      // Write Protect
+  # #define CR0_PG          0x80000000      // Paging
+  # #define CR0_WP          0x00010000      // Write Protect
   orl     $(CR0_PG|CR0_WP), %eax
   movl    %eax, %cr0
 

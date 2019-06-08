@@ -50,8 +50,8 @@ struct log log;
 static void recover_from_log(void);
 static void commit();
 
-void
-initlog(int dev)
+// initlog(ROOTDEV) where ROOTDEV=1
+void initlog(int dev)
 {
   if (sizeof(struct logheader) >= BSIZE)
     panic("initlog: too big logheader");
@@ -115,6 +115,7 @@ write_head(void)
 static void
 recover_from_log(void)
 {
+  // Read the log header from disk into the in-memory log header
   read_head();
   install_trans(); // if committed, copy from log to disk
   log.lh.n = 0;

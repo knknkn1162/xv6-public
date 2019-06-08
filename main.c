@@ -5,10 +5,12 @@
 #include "mmu.h"
 #include "proc.h"
 #include "x86.h"
+#include "mp.h"
 
 static void startothers(void);
 static void mpmain(void)  __attribute__((noreturn));
 extern pde_t *kpgdir;
+extern struct mp *gmp;
 
 /* 0x801020c0                entrypgdir */
 /* [!provide]                PROVIDE (end = .) */
@@ -27,8 +29,10 @@ main(void)
   // using entrypgdir to place just the pages
   // free address at end=ceil(x801020c0)(=0x80103000) ~ 0x80503000
   // At this stage, pgdir is defined at 0x80000000~0x80400000,
+  // freerange(vstart, vend);
   kinit1(end, P2V(4*1024*1024)); // phys page allocator
 
+  // setupkvm and switchkvm( lcr3(V2P(kpgdir)); )
   kvmalloc();      // kernel page table
   mpinit();        // detect other processors
   /* ignores interrupts from the PIC, and configures the IOAPIC and local APIC */
@@ -38,7 +42,7 @@ main(void)
   // struct segdesc gdt[NSEGS];   // x86 global descriptor table
   seginit();       // segment descriptors
   // Don't use the 8259A interrupt controllers.  Xv6 assumes SMP hardware.
-  picinit();       // disable pic
+  picinit();       // disable pic // outb(IO_PIC1+1, 0xFF);
   ioapicinit();    // another interrupt controller
 
   consoleinit();   // console hardware
@@ -46,6 +50,11 @@ main(void)
   // lock ptable
   pinit();         // process table
 
+  if(gmp->imcrp){
+    char *p;
+    for(p="mmmm...\n"; *p; p++)
+      uartputc(*p);
+  }
   // setup the 256 entries in the table IDT(Interrupt descriptor table)
   // set interrupt gate & trap gate
   tvinit();        // trap vectors

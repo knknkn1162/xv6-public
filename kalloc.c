@@ -70,6 +70,7 @@ kfree(char *v)
   if(kmem.use_lock)
     acquire(&kmem.lock);
   r = (struct run*)v;
+  // curculr
   r->next = kmem.freelist;
   kmem.freelist = r;
   if(kmem.use_lock)
@@ -82,6 +83,7 @@ kfree(char *v)
 char*
 kalloc(void)
 {
+  // struct run { struct run *next;};
   struct run *r;
 
   // if kmem.use_lock = 0, still disable interrupt

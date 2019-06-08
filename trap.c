@@ -15,6 +15,7 @@ struct gatedesc idt[256];
 /* #     pushl $0 */
 /* #     pushl $0 */
 /* #     jmp alltraps */
+// XXX: is it type long instead of uint?
 extern uint vectors[];  // in vectors.S: array of 256 entry pointers
 struct spinlock tickslock;
 uint ticks;
@@ -30,11 +31,13 @@ tvinit(void)
     // 0 for an interrupt gate.
     // #define SEG_KCODE 1  // kernel code
     // Code segment selector
+    // #define SETGATE(gate, istrap, sel, off, d)
+    // //   (gate).type = (istrap) ? STS_TG32(0xF) : STS_IG32(0xE);
     SETGATE(idt[i], 0, SEG_KCODE<<3, vectors[i], 0);
-  // interrupt gate
   // Trap gates don't clear the EFLAG, allowing other interrupts during the system call handler, whereas interrupts set the EFLAG.
   // DPL_USER allows a user program to generate the trap with an explicit `int` instruction
   // #define T_SYSCALL       64      // system call
+  // Trap-gate descriptor
   SETGATE(idt[T_SYSCALL], 1, SEG_KCODE<<3, vectors[T_SYSCALL], DPL_USER);
 
   initlock(&tickslock, "time");
@@ -79,12 +82,13 @@ trap(struct trapframe *tf)
     // Bochs generates spurious IDE1 interrupts.
     break;
   case T_IRQ0 + IRQ_KBD:
+    // exec consoleintr(kbdgetc);
     kbdintr();
-    lapiceoi();
+    lapiceoi(); // lapicw(EOI, 0);
     break;
   case T_IRQ0 + IRQ_COM1:
     uartintr();
-    lapiceoi();
+    lapiceoi(); // lapicw(EOI, 0);
     break;
   case T_IRQ0 + 7:
   case T_IRQ0 + IRQ_SPURIOUS:

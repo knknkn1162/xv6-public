@@ -133,6 +133,7 @@ userinit(void)
   if((p->pgdir = setupkvm()) == 0)
     panic("userinit: out of memory?");
   // Load the initcode into address 0 of pgdir.
+  // // mappages(pgdir, 0, PGSIZE, V2P(mem), PTE_W|PTE_U); where mem = kalloc();
   inituvm(p->pgdir, _binary_initcode_start, (int)_binary_initcode_size);
   p->sz = PGSIZE;
   memset(p->tf, 0, sizeof(*p->tf));
@@ -352,6 +353,7 @@ scheduler(void)
       // before jumping back to us.
       c->proc = p;
       switchuvm(p);
+      // why do we need?
       p->state = RUNNING;
 
       // switch current context to next context
@@ -422,7 +424,10 @@ forkret(void)
     // of a regular process (e.g., they call sleep), and thus cannot
     // be run from main().
     first = 0;
+    // load struct superblock
+    // #define ROOTDEV       1  // device number of file system root disk
     iinit(ROOTDEV);
+    // load struct log
     initlog(ROOTDEV);
   }
 

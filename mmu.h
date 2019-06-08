@@ -33,7 +33,7 @@ struct segdesc {
   uint base_15_0 : 16; // Low bits of segment base address
   uint base_23_16 : 8; // Middle bits of segment base address
   uint type : 4;       // Segment type (see STS_ constants)
-  uint s : 1;          // 0 = system, 1 = application
+  uint s : 1;          // 0 = system, 1 = application. when TSS, always 0
   uint dpl : 2;        // Descriptor Privilege Level
   uint p : 1;          // Present
   uint lim_19_16 : 4;  // High bits of segment limit
@@ -174,6 +174,8 @@ struct gatedesc {
 // - dpl: Descriptor Privilege Level -
 //        the privilege level required for software to invoke
 //        this interrupt/trap gate explicitly using an int instruction.
+// #define STS_IG32    0xE     // 32-bit Interrupt Gate
+// #define STS_TG32    0xF     // 32-bit Trap Gate
 #define SETGATE(gate, istrap, sel, off, d)                \
 {                                                         \
   (gate).off_15_0 = (uint)(off) & 0xffff;                \

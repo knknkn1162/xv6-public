@@ -53,6 +53,7 @@ uartinit(void)
   inb(COM1+2);
   inb(COM1+0);
   // usually, COM1 <-> IRQ4(#define IRQ_COM1         4)
+  // COM1: first serial port
   ioapicenable(IRQ_COM1, 0);
 
   // Announce that we're here.

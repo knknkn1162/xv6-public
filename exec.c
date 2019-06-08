@@ -34,6 +34,7 @@ exec(char *path, char **argv)
 
   // Check ELF header
   // ip: inode
+  // get block number from ip->addrs[0] and bread from block-number
   if(readi(ip, (char*)&elf, 0, sizeof(elf)) != sizeof(elf))
     goto bad;
   if(elf.magic != ELF_MAGIC)
@@ -61,7 +62,9 @@ exec(char *path, char **argv)
       goto bad;
     if(ph.vaddr % PGSIZE != 0)
       goto bad;
-    // loaduvm(pde_t *pgdir, char *addr, struct inode *ip, uint offset, uint sz)
+    // loaduvm(pde_t *pgdir, char *vaddr, struct inode *ip, uint offset, uint sz)
+    // // Load a program segment into pgdir via `readi(ip, P2V(pa), offset+i, n)` where `pa = PTE_ADDR(*pte)`
+    // vaddr: initial virtual memory address to load this segment to
     if(loaduvm(pgdir, (char*)ph.vaddr, ip, ph.off, ph.filesz) < 0)
       goto bad;
   }
@@ -115,7 +118,6 @@ exec(char *path, char **argv)
   curproc->tf->esp = sp;
   switchuvm(curproc);
   freevm(oldpgdir);
-  // It should never ends when init process... why?
   return 0;
 
  bad:

@@ -116,10 +116,24 @@ bget(uint dev, uint blockno)
 struct buf*
 bread(uint dev, uint blockno)
 {
+  /*
+  struct buf {
+    int flags;
+    uint dev;
+    uint blockno;
+    struct sleeplock lock;
+    uint refcnt;
+    struct buf *prev; // LRU cache list
+    struct buf *next;
+    struct buf *qnext; // disk queue
+    // #define BSIZE 512  // block size
+    uchar data[BSIZE];
+  };
+   */
   struct buf *b;
 
   b = bget(dev, blockno);
-  if((b->flags & B_VALID) == 0) {
+  if((b->flags & B_VALID) == 0) { // // buffer has been read from disk
     iderw(b);
   }
   return b;

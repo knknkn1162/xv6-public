@@ -30,23 +30,34 @@ start:
   # with 2 MB would run software that assumed 1 MB.  Undo that.
 # The boot loader must enable the 21st address bit using I/O to the keyboard controller on ports 0x64 & 0x60
 seta20.1:
+  # Status Register
   # read the status register form the keyboard controller via the port 0x64
   inb     $0x64,%al               # Wait for not busy
-  testb   $0x2,%al
+  testb   $0x2,%al # check if the input buffer is full
   # If input buffer is full(bit1 is set), repeat
   jnz     seta20.1
 
   # write output port. next byte written  to 0060 will be written to the 804x output port; the original IBM AT and many compatibles use bit 1 of the output port to control the A20 gate.
-  # Write output port(P2) ..0xd1
+  # Write output port(P2) ..0xd1 0xD1 (Write output port) - Write parameter to output port (see Output Port definition.)
+  # 0xd1: 11010001
+# bit0: 1(IRQ 1 permit)
+# bit1: 0(IRQ12: disable)
+
+# Writing to port 0x64 doesn't write to any specific register, but sends a command(0xd1) for the 8042 to interpret.  If the command accepts a parameter, this parameter is sent to port 0x60
   movb    $0xd1,%al               # 0xd1 -> port 0x64
-  outb    %al,$0x64
+  outb    %al,$0x64 // Keyboard Controller Commands
 
 seta20.2:
+  # read status register
   inb     $0x64,%al               # Wait for not busy
   testb   $0x2,%al
   jnz     seta20.2
 
   # Command 0xdf: Enable A20 address line
+  ## DF	sngl  enable address line A20 (HP Vectra only???)
+# 1101_1111: 
+# bit0: 1 (1: Normal)
+# bit1: 
   movb    $0xdf,%al               # 0xdf -> port 0x60
   # sngl  enable address line A20
   outb    %al,$0x60

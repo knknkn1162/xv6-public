@@ -88,6 +88,8 @@ lapicinit(void)
   // on machines that provide that interrupt entry.
   #define VER     (0x0030/4)   // Version
   // #define PCINT   (0x0340/4)   // Performance Counter LVT
+  // the P6 family processors(4) or the Pentium 4 and Intel Xeon processors(5)
+  // Shows the number of LVT entries minus 1.
   if(((lapic[VER]>>16) & 0xFF) >= 4)
     lapicw(PCINT, MASKED);
 
@@ -96,6 +98,7 @@ lapicinit(void)
 
   // Clear error status register (requires back-to-back writes).
   // #define ESR     (0x0280/4)   // Error Status
+  // Before attempt to read from the ESR, software should first write to it.
   lapicw(ESR, 0);
   lapicw(ESR, 0);
 
@@ -167,7 +170,7 @@ lapicstartap(uchar apicid, uint addr)
   outb(CMOS_PORT, 0xF);  // offset 0xF is shutdown code
   outb(CMOS_PORT+1, 0x0A);
 
-  // JMP to Dword ptr at 40:67 without EOI
+  // JMP to Dword ptr at 40:67 without EOI(end-of-interrupt) register
   wrv = (ushort*)P2V((0x40<<4 | 0x67));  // Warm reset vector
   wrv[0] = 0;
   wrv[1] = addr >> 4;

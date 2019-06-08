@@ -26,6 +26,17 @@ static void itrunc(struct inode*);
 // there should be one superblock per disk device, but we run with
 // only one device
 struct superblock sb; 
+/*
+struct superblock {
+  uint size;         // Size of file system image (blocks)
+  uint nblocks;      // Number of data blocks
+  uint ninodes;      // Number of inodes.
+  uint nlog;         // Number of log blocks
+  uint logstart;     // Block number of first log block
+  uint inodestart;   // Block number of first inode block
+  uint bmapstart;    // Block number of first free map block
+};
+ */
 
 // Read the super block.
 void
@@ -33,7 +44,24 @@ readsb(int dev, struct superblock *sb)
 {
   struct buf *bp;
 
+  //struct buf* bread(uint dev, uint blockno)
   bp = bread(dev, 1);
+  /*
+  struct buf {
+    int flags;
+    uint dev;
+    uint blockno;
+    struct sleeplock lock;
+    uint refcnt;
+    struct buf *prev; // LRU cache list
+    struct buf *next;
+    struct buf *qnext; // disk queue
+    // #define BSIZE 512  // block size
+    uchar data[BSIZE];
+  };
+   */
+  // blockno = 1 is superblock(blockno=0 is boot block)
+  // sb is global variable
   memmove(sb, bp->data, sizeof(*sb));
   brelse(bp);
 }
@@ -166,6 +194,7 @@ bfree(int dev, uint b)
 
 struct {
   struct spinlock lock;
+  // #define NINODE       50  // maximum number of active i-nodes
   struct inode inode[NINODE];
 } icache;
 
@@ -176,10 +205,25 @@ iinit(int dev)
   
   initlock(&icache.lock, "icache");
   for(i = 0; i < NINODE; i++) {
+    // lk->name = name;
+    // lk->locked = 0;
+    // lk->pid = 0;
     initsleeplock(&icache.inode[i].lock, "inode");
   }
 
+  // readsb(int dev, struct superblock *sb)
   readsb(dev, &sb);
+  /*
+  struct superblock {
+    uint size;         // Size of file system image (blocks)
+    uint nblocks;      // Number of data blocks
+    uint ninodes;      // Number of inodes.
+    uint nlog;         // Number of log blocks
+    uint logstart;     // Block number of first log block
+    uint inodestart;   // Block number of first inode block
+    uint bmapstart;    // Block number of first free map block
+  };
+  */
   cprintf("sb: size %d nblocks %d ninodes %d nlog %d logstart %d\
  inodestart %d bmap start %d\n", sb.size, sb.nblocks,
           sb.ninodes, sb.nlog, sb.logstart, sb.inodestart,
@@ -366,7 +410,7 @@ iunlockput(struct inode *ip)
 // The content (data) associated with each inode is stored
 // in blocks on the disk. The first NDIRECT block numbers
 // are listed in ip->addrs[].  The next NINDIRECT blocks are
-// listed in block ip->addrs[NDIRECT].
+// listed in block ip->addrs[NDIRECT]. // #define NINDIRECT (BSIZE / sizeof(uint))
 
 // Return the disk block address of the nth block in inode ip.
 // If there is no such block, bmap allocates one.
@@ -450,6 +494,24 @@ stati(struct inode *ip, struct stat *st)
 //PAGEBREAK!
 // Read data from inode.
 // Caller must hold ip->lock.
+/*
+struct inode {
+  uint dev;           // Device number
+  uint inum;          // Inode number
+  int ref;            // Reference count
+  struct sleeplock lock; // protects everything below here
+  int valid;          // inode has been read from disk?
+
+  short type;         // copy of disk inode
+  short major;
+  short minor;
+  short nlink;
+  uint size;
+  uint addrs[NDIRECT+1];
+};
+ */
+// b = bget(dev, blockno=bmap(ip, off/BSIZE));
+// if readi(ip, (char*)&elf, 0, sizeof(elf), blockno=ip->addrs[0]
 int
 readi(struct inode *ip, char *dst, uint off, uint n)
 {
@@ -468,8 +530,12 @@ readi(struct inode *ip, char *dst, uint off, uint n)
     n = ip->size - off;
 
   for(tot=0; tot<n; tot+=m, off+=m, dst+=m){
+    // struct buf* bread(uint dev, uint blockno)
+    // // bmap(ip, off/BSIZE) .. get blockno
+    // // The first NDIRECT block numbers are listed in ip->addrs[].
     bp = bread(ip->dev, bmap(ip, off/BSIZE));
     m = min(n - tot, BSIZE - off%BSIZE);
+    // memmove(void *dst, const void *src, uint n)
     memmove(dst, bp->data + off%BSIZE, m);
     brelse(bp);
   }

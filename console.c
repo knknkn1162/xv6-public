@@ -125,7 +125,7 @@ panic(char *s)
 
 //PAGEBREAK: 50
 #define BACKSPACE 0x100
-#define CRTPORT 0x3d4
+#define CRTPORT 0x3d4 // CGA   (Color Graphics Adapter)
 static ushort *crt = (ushort*)P2V(0xb8000);  // CGA memory
 
 static void
@@ -193,15 +193,18 @@ struct {
 
 #define C(x)  ((x)-'@')  // Control-x
 
+// getc: kbdgetc, uartgetc
 void
 consoleintr(int (*getc)(void))
 {
   int c, doprocdump = 0;
 
   acquire(&cons.lock);
-  while((c = getc()) >= 0){
+  // kbdgetc: kbdintr
+  // uartgetc: 
+  while((c = getc()) >= 0){ // get character
     switch(c){
-    // #define C(x)  ((x)-'@')  // Control-x
+    // #define C(x)  ((x)-'@')  // Control-x '@': 0x40
     case C('P'):  // Process listing.
       // procdump() locks cons.lock indirectly; invoke later
       doprocdump = 1;
@@ -213,6 +216,7 @@ consoleintr(int (*getc)(void))
         consputc(BACKSPACE);
       }
       break;
+    // sighup
     case C('H'): case '\x7f':  // Backspace
       if(input.e != input.w){
         input.e--;
@@ -299,8 +303,15 @@ consoleinit(void)
 
   // #define CONSOLE 1
   // Use this with readi() or writei() function such as `devsw[ip->major].read(ip, dst, n);`
+  // // struct devsw devsw[NDEV];
   devsw[CONSOLE].write = consolewrite;
   devsw[CONSOLE].read = consoleread;
+/*
+static struct {
+  struct spinlock lock;
+  int locking;
+} cons;
+ */
   cons.locking = 1;
 
   ioapicenable(IRQ_KBD, 0);
